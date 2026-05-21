@@ -53,6 +53,7 @@ server:
 jwt:
   secret: ${JWT_SECRET:servix-super-secret-key-change-in-production-min-256-bits}
   expiration: ${JWT_EXPIRATION:86400000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
 
 springdoc:
   api-docs:
@@ -65,6 +66,12 @@ springdoc:
     title: Servix API
     description: API do marketplace de serviços Servix
     version: 1.0.0
+  components:
+    security-schemes:
+      bearerAuth:
+        type: http
+        scheme: bearer
+        bearer-format: JWT
 
 logging:
   level:
