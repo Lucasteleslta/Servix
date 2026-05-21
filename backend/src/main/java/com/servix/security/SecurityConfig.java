@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .requestMatchers("/docs/**", "/actuator/health").permitAll()
                 .requestMatchers(HttpMethod.GET, "/providers", "/providers/{id}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/service-requests", "/service-requests/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/reviews/provider/**").permitAll()
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
