@@ -42,7 +42,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/login", "/auth/register", "/auth/refresh").permitAll()
                 .requestMatchers("/docs/**", "/actuator/health").permitAll()
-                .requestMatchers(HttpMethod.GET, "/providers", "/providers/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/providers", "/providers/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/service-requests", "/service-requests/{id}").permitAll()
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
