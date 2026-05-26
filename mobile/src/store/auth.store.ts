@@ -6,7 +6,7 @@ import { User } from '../types/models';
 interface AuthState {
   user: User | null;
   token: string | null;
-  isAuthenticated: boolean;
+  // Derived at call sites with Boolean(token) — not persisted to avoid string coercion
   setAuth: (user: User, token: string) => void;
   logout: () => void;
   restoreSession: () => void;
@@ -29,21 +29,17 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       token: null,
-      isAuthenticated: false,
 
       setAuth: (user, token) => {
-        set({ user, token, isAuthenticated: true });
+        set({ user, token });
       },
 
       logout: () => {
-        set({ user: null, token: null, isAuthenticated: false });
+        set({ user: null, token: null });
       },
 
       restoreSession: () => {
-        const { token, user } = get();
-        if (token && user) {
-          set({ isAuthenticated: true });
-        }
+        // No-op: token/user are restored automatically by zustand persist
       },
     }),
     {

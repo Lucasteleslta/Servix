@@ -8,15 +8,22 @@ import { ProviderNavigator } from './ProviderNavigator';
 const Stack = createNativeStackNavigator();
 
 export function AppNavigator() {
-  const { token, user } = useAuthStore();
+  const token = useAuthStore((s) => s.token);
+  const role = useAuthStore((s) => s.user?.role);
 
-  if (!token) {
-    return <AuthNavigator />;
-  }
+  // Derive boolean explicitly to avoid string/boolean coercion from persisted storage
+  const isAuthenticated = Boolean(token);
+  const isProvider = role === 'PROVIDER';
 
-  if (user?.role === 'PROVIDER') {
-    return <ProviderNavigator />;
-  }
-
-  return <ClientNavigator />;
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {!isAuthenticated ? (
+        <Stack.Screen name="Auth" component={AuthNavigator} />
+      ) : isProvider ? (
+        <Stack.Screen name="Provider" component={ProviderNavigator} />
+      ) : (
+        <Stack.Screen name="Client" component={ClientNavigator} />
+      )}
+    </Stack.Navigator>
+  );
 }
