@@ -18,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -29,9 +30,19 @@ public class ProviderController {
     private final ProviderService providerService;
 
     @GetMapping
-    @Operation(summary = "Listar todos os providers")
-    public Page<ProviderResponse> listAll(@PageableDefault(size = 20) Pageable pageable) {
-        return providerService.listAll(pageable);
+    @Operation(summary = "Listar providers com filtros opcionais de categoria e cidade")
+    public Page<ProviderResponse> listAll(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String city,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+        return providerService.listAll(category, city, pageable);
+    }
+
+    @GetMapping("/featured")
+    @Operation(summary = "Providers em destaque (melhor avaliados e disponíveis)")
+    public List<ProviderResponse> getFeatured() {
+        return providerService.getFeatured();
     }
 
     @GetMapping("/{id}")

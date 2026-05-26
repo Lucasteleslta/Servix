@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/service-requests")
+@RequestMapping("/requests")
 @RequiredArgsConstructor
 @Tag(name = "Service Requests", description = "Pedidos de serviço e propostas")
 public class ServiceRequestController {
@@ -36,12 +36,6 @@ public class ServiceRequestController {
         return service.listOpen(category, pageable);
     }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Buscar pedido por ID")
-    public ServiceRequestResponse getById(@PathVariable UUID id) {
-        return service.getById(id);
-    }
-
     @GetMapping("/my")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Meus pedidos como cliente")
@@ -52,14 +46,20 @@ public class ServiceRequestController {
         return service.listMyRequests(principal.getUsername(), pageable);
     }
 
-    @GetMapping("/assigned")
+    @GetMapping("/received")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Pedidos atribuídos a mim como provider")
-    public Page<ServiceRequestResponse> assigned(
+    @Operation(summary = "Pedidos recebidos por mim como prestador")
+    public Page<ServiceRequestResponse> received(
             @AuthenticationPrincipal UserDetails principal,
             @PageableDefault(size = 20) Pageable pageable
     ) {
-        return service.listAssignedToMe(principal.getUsername(), pageable);
+        return service.listReceived(principal.getUsername(), pageable);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Buscar pedido por ID")
+    public ServiceRequestResponse getById(@PathVariable UUID id) {
+        return service.getById(id);
     }
 
     @PostMapping
@@ -73,15 +73,34 @@ public class ServiceRequestController {
         return service.create(req, principal.getUsername());
     }
 
-    @PatchMapping("/{id}/status")
+    @PatchMapping("/{id}/cancel")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Atualizar status do pedido")
-    public ServiceRequestResponse updateStatus(
+    @Operation(summary = "Cancelar pedido (cliente ou prestador atribuído)")
+    public ServiceRequestResponse cancel(
             @PathVariable UUID id,
-            @Valid @RequestBody UpdateStatusRequest req,
             @AuthenticationPrincipal UserDetails principal
     ) {
-        return service.updateStatus(id, req, principal.getUsername());
+        return service.cancel(id, principal.getUsername());
+    }
+
+    @PatchMapping("/{id}/accept")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Aceitar pedido (prestador se atribui ao pedido)")
+    public ServiceRequestResponse accept(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        return service.accept(id, principal.getUsername());
+    }
+
+    @PatchMapping("/{id}/complete")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Marcar pedido como concluído (prestador atribuído)")
+    public ServiceRequestResponse complete(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        return service.complete(id, principal.getUsername());
     }
 
     @DeleteMapping("/{id}")

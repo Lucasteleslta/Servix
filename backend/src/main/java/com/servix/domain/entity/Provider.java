@@ -43,6 +43,9 @@ public class Provider {
     @Builder.Default
     private Integer totalReviews = 0;
 
+    @Column(length = 100)
+    private String city;
+
     private Double latitude;
     private Double longitude;
 

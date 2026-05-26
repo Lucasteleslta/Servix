@@ -50,7 +50,7 @@ public class ServiceRequestService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ServiceRequestResponse> listAssignedToMe(String email, Pageable pageable) {
+    public Page<ServiceRequestResponse> listReceived(String email, Pageable pageable) {
         User provider = findUser(email);
         return requestRepository.findByProvider(provider, pageable).map(ServiceRequestResponse::from);
     }
@@ -74,27 +74,54 @@ public class ServiceRequestService {
     }
 
     @Transactional
-    public ServiceRequestResponse updateStatus(UUID id, UpdateStatusRequest req, String email) {
+    public ServiceRequestResponse cancel(UUID id, String email) {
         ServiceRequest sr = findRequest(id);
         User user = findUser(email);
 
         boolean isClient = sr.getClient().getId().equals(user.getId());
-        boolean isProvider = sr.getProvider() != null && sr.getProvider().getId().equals(user.getId());
+        boolean isAssignedProvider = sr.getProvider() != null && sr.getProvider().getId().equals(user.getId());
 
-        if (!isClient && !isProvider) {
-            throw new BusinessException("Not allowed to update this request", HttpStatus.FORBIDDEN);
+        if (!isClient && !isAssignedProvider) {
+            throw new BusinessException("Not allowed to cancel this request", HttpStatus.FORBIDDEN);
+        }
+        if (sr.getStatus() == RequestStatus.COMPLETED || sr.getStatus() == RequestStatus.CANCELLED) {
+            throw new BusinessException("Request cannot be cancelled in status " + sr.getStatus(), HttpStatus.CONFLICT);
         }
 
-        RequestStatus newStatus = req.status();
+        sr.setStatus(RequestStatus.CANCELLED);
+        return ServiceRequestResponse.from(requestRepository.save(sr));
+    }
 
-        if (newStatus == RequestStatus.CANCELLED && !isClient) {
-            throw new BusinessException("Only the client can cancel a request", HttpStatus.FORBIDDEN);
+    @Transactional
+    public ServiceRequestResponse accept(UUID id, String email) {
+        ServiceRequest sr = findRequest(id);
+        User provider = findUser(email);
+
+        if (sr.getStatus() != RequestStatus.PENDING) {
+            throw new BusinessException("Only PENDING requests can be accepted", HttpStatus.CONFLICT);
         }
-        if (newStatus == RequestStatus.COMPLETED && !isProvider) {
+        if (sr.getClient().getId().equals(provider.getId())) {
+            throw new BusinessException("Client cannot accept their own request", HttpStatus.FORBIDDEN);
+        }
+
+        sr.setStatus(RequestStatus.ACCEPTED);
+        sr.setProvider(provider);
+        return ServiceRequestResponse.from(requestRepository.save(sr));
+    }
+
+    @Transactional
+    public ServiceRequestResponse complete(UUID id, String email) {
+        ServiceRequest sr = findRequest(id);
+        User user = findUser(email);
+
+        if (sr.getProvider() == null || !sr.getProvider().getId().equals(user.getId())) {
             throw new BusinessException("Only the assigned provider can mark as completed", HttpStatus.FORBIDDEN);
         }
+        if (sr.getStatus() != RequestStatus.ACCEPTED && sr.getStatus() != RequestStatus.IN_PROGRESS) {
+            throw new BusinessException("Request must be ACCEPTED or IN_PROGRESS to complete", HttpStatus.CONFLICT);
+        }
 
-        sr.setStatus(newStatus);
+        sr.setStatus(RequestStatus.COMPLETED);
         return ServiceRequestResponse.from(requestRepository.save(sr));
     }
 

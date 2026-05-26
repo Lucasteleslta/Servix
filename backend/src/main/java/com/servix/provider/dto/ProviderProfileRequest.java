@@ -10,6 +10,7 @@ public record ProviderProfileRequest(
         @NotBlank @Size(max = 50) String category,
         @Size(max = 2000) String description,
         @DecimalMin("0.00") BigDecimal hourlyRate,
+        @Size(max = 100) String city,
         Double latitude,
         Double longitude
 ) {}
