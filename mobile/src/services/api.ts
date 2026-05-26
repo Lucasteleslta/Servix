@@ -1,16 +1,14 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import * as SecureStore from 'expo-secure-store';
-
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080/api';
+import axios from 'axios';
+import { useAuthStore } from '../store/auth.store';
 
 export const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: 'http://localhost:8080/api',
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
 });
 
-api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-  const token = await SecureStore.getItemAsync('auth_token');
+api.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -19,13 +17,10 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 
 api.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError) => {
+  (error) => {
     if (error.response?.status === 401) {
-      await SecureStore.deleteItemAsync('auth_token');
-      await SecureStore.deleteItemAsync('auth_user');
+      useAuthStore.getState().logout();
     }
     return Promise.reject(error);
-  },
+  }
 );
-
-export default api;

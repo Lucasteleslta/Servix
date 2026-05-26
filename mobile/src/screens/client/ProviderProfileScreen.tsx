@@ -1,0 +1,255 @@
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
+import { Colors } from '../../constants/colors';
+import { providerService } from '../../services/provider.service';
+import { Provider } from '../../types/models';
+import { ClientStackParamList } from '../../navigation/ClientNavigator';
+
+type Props = {
+  navigation: NativeStackNavigationProp<ClientStackParamList, 'ProviderProfile'>;
+  route: RouteProp<ClientStackParamList, 'ProviderProfile'>;
+};
+
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 2 }}>
+      {[1, 2, 3, 4, 5].map((s) => (
+        <Ionicons
+          key={s}
+          name={s <= Math.round(rating) ? 'star' : 'star-outline'}
+          size={16}
+          color={Colors.warning}
+        />
+      ))}
+    </View>
+  );
+}
+
+export function ProviderProfileScreen({ navigation, route }: Props) {
+  const { providerId } = route.params;
+  const [provider, setProvider] = useState<Provider | null>(null);
+
+  useEffect(() => {
+    providerService.getById(providerId).then(setProvider).catch(() => {});
+  }, [providerId]);
+
+  const p = provider ?? {
+    id: providerId,
+    userId: '',
+    name: 'Marco Silva',
+    specialty: 'Eletricista',
+    bio: 'Profissional com mais de 10 anos de experiência em instalações elétricas residenciais e comerciais.',
+    rating: 4.8,
+    reviewCount: 127,
+    city: 'São Paulo',
+    available: true,
+    services: ['Instalação elétrica', 'Tomadas', 'Disjuntores', 'Quadro de luz'],
+    portfolio: [],
+  };
+
+  return (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={styles.heroHeader}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={24} color={Colors.white} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.favoriteBtn}>
+          <Ionicons name="heart-outline" size={24} color={Colors.white} />
+        </TouchableOpacity>
+        <View style={styles.heroContent}>
+          <View style={styles.heroAvatar}>
+            <Text style={styles.heroAvatarText}>{p.name[0]}</Text>
+          </View>
+          <Text style={styles.heroName}>{p.name}</Text>
+          <Text style={styles.heroSpecialty}>{p.specialty}</Text>
+          {p.available && (
+            <View style={styles.availableBadge}>
+              <View style={styles.availableDot} />
+              <Text style={styles.availableText}>Disponível</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      <View style={styles.ratingRow}>
+        <StarRating rating={p.rating} />
+        <Text style={styles.ratingText}>{p.rating.toFixed(1)}</Text>
+        <Text style={styles.reviewCount}>({p.reviewCount} avaliações)</Text>
+        <Text style={styles.city}>· {p.city}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Sobre</Text>
+        <Text style={styles.bioText}>{p.bio}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Serviços</Text>
+        <View style={styles.chips}>
+          {p.services.map((s, i) => (
+            <View key={i} style={styles.chip}>
+              <Text style={styles.chipText}>{s}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Portfólio</Text>
+        <View style={styles.portfolio}>
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <View key={i} style={styles.portfolioItem}>
+              <Text style={styles.portfolioPlaceholder}>📷</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.actions}>
+        <TouchableOpacity
+          style={styles.primaryBtn}
+          onPress={() => navigation.navigate('Booking', { providerId: p.id })}
+        >
+          <Text style={styles.primaryBtnText}>Solicitar orçamento</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.outlineBtn}
+          onPress={() => navigation.navigate('Chat', { requestId: p.id, providerName: p.name })}
+        >
+          <Text style={styles.outlineBtnText}>Enviar mensagem</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={{ height: 24 }} />
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: Colors.background },
+  heroHeader: {
+    backgroundColor: Colors.surface,
+    paddingTop: 60,
+    paddingBottom: 28,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    position: 'relative',
+  },
+  backBtn: {
+    position: 'absolute',
+    top: 60,
+    left: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  favoriteBtn: {
+    position: 'absolute',
+    top: 60,
+    right: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroContent: { alignItems: 'center' },
+  heroAvatar: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    borderWidth: 3,
+    borderColor: Colors.background,
+  },
+  heroAvatarText: { color: Colors.white, fontSize: 36, fontWeight: '700' },
+  heroName: { fontSize: 20, fontWeight: '700', color: Colors.white },
+  heroSpecialty: { fontSize: 14, color: Colors.textMuted, marginTop: 4 },
+  availableBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,200,150,0.15)',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginTop: 8,
+    gap: 6,
+  },
+  availableDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.secondary },
+  availableText: { color: Colors.secondary, fontSize: 13, fontWeight: '600' },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    gap: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  ratingText: { fontSize: 14, fontWeight: '700', color: Colors.white },
+  reviewCount: { fontSize: 13, color: Colors.textMuted },
+  city: { fontSize: 13, color: Colors.textMuted },
+  section: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 4 },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.white, marginBottom: 12 },
+  bioText: { fontSize: 14, color: Colors.textMuted, lineHeight: 22 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+  },
+  chipText: { color: Colors.textSecondary, fontSize: 13 },
+  portfolio: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  portfolioItem: {
+    width: '31%',
+    aspectRatio: 1,
+    backgroundColor: Colors.surface,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  portfolioPlaceholder: { fontSize: 28 },
+  actions: { paddingHorizontal: 20, paddingTop: 24, gap: 12 },
+  primaryBtn: {
+    backgroundColor: Colors.primary,
+    height: 52,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryBtnText: { color: Colors.white, fontSize: 16, fontWeight: '600' },
+  outlineBtn: {
+    height: 52,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  outlineBtnText: { color: Colors.textSecondary, fontSize: 16 },
+});

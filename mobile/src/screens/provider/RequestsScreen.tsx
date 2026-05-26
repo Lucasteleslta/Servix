@@ -1,0 +1,181 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+} from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Colors } from '../../constants/colors';
+import { requestService } from '../../services/request.service';
+import { ServiceRequest } from '../../types/models';
+import { ProviderStackParamList } from '../../navigation/ProviderNavigator';
+
+type Props = {
+  navigation: NativeStackNavigationProp<ProviderStackParamList, 'ProviderHomeMain'>;
+};
+
+type Tab = 'new' | 'active' | 'done';
+
+const STATUS_COLORS: Record<string, string> = {
+  PENDING: Colors.warning,
+  ACCEPTED: Colors.secondary,
+  IN_PROGRESS: Colors.primary,
+  COMPLETED: Colors.success,
+  CANCELLED: Colors.error,
+};
+
+const MOCK: ServiceRequest[] = [
+  { id: '1', clientId: 'c1', title: 'Instalação de tomadas', description: '4 tomadas novas.', category: 'Elétrica', address: 'R. das Flores, 123', urgency: 'URGENT', status: 'PENDING', createdAt: '2026-05-26', updatedAt: '2026-05-26' },
+  { id: '2', clientId: 'c2', title: 'Troca de disjuntor', description: 'Disjuntor queimado.', category: 'Elétrica', address: 'Av. Brasil, 456', urgency: 'NORMAL', status: 'IN_PROGRESS', createdAt: '2026-05-24', updatedAt: '2026-05-24' },
+  { id: '3', clientId: 'c3', title: 'Fiação nova', description: 'Refazer a fiação.', category: 'Elétrica', address: 'Rua X, 789', urgency: 'NORMAL', status: 'COMPLETED', createdAt: '2026-05-20', updatedAt: '2026-05-22' },
+];
+
+export function RequestsScreen({ navigation }: Props) {
+  const [tab, setTab] = useState<Tab>('new');
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
+
+  useEffect(() => {
+    requestService.getReceivedRequests().then(setRequests).catch(() => setRequests(MOCK));
+  }, []);
+
+  const allRequests = requests.length > 0 ? requests : MOCK;
+  const filtered = allRequests.filter((r) => {
+    if (tab === 'new') return r.status === 'PENDING';
+    if (tab === 'active') return ['ACCEPTED', 'IN_PROGRESS'].includes(r.status);
+    return r.status === 'COMPLETED';
+  });
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.pageTitle}>Pedidos</Text>
+
+      <View style={styles.tabs}>
+        {([['new', 'Novas'], ['active', 'Em andamento'], ['done', 'Concluídas']] as [Tab, string][]).map(([t, label]) => (
+          <TouchableOpacity
+            key={t}
+            style={[styles.tab, tab === t && styles.tabActive]}
+            onPress={() => setTab(t)}
+          >
+            <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>{label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <FlatList
+        data={filtered}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+            <View style={styles.cardTop}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>C</Text>
+              </View>
+              <View style={styles.cardInfo}>
+                <Text style={styles.cardTitle}>{item.title}</Text>
+                <Text style={styles.cardLocation}>📍 {item.address}</Text>
+                <Text style={styles.cardDate}>{item.createdAt}</Text>
+              </View>
+              <View style={[styles.badge, { backgroundColor: (STATUS_COLORS[item.status] ?? Colors.textMuted) + '22' }]}>
+                <Text style={[styles.badgeText, { color: STATUS_COLORS[item.status] ?? Colors.textMuted }]}>
+                  {item.urgency === 'URGENT' ? 'Urgente' : item.status === 'PENDING' ? 'Nova' : item.status}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.cardActions}>
+              <TouchableOpacity
+                style={styles.viewBtn}
+                onPress={() => navigation.navigate('RequestDetail', { requestId: item.id })}
+              >
+                <Text style={styles.viewBtnText}>Ver detalhes</Text>
+              </TouchableOpacity>
+              {item.status === 'PENDING' && (
+                <TouchableOpacity style={styles.refuseBtn}>
+                  <Text style={styles.refuseBtnText}>Recusar</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Text style={styles.emptyText}>Nenhum pedido encontrado</Text>
+          </View>
+        }
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: Colors.background },
+  pageTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.white,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
+  },
+  tabs: { flexDirection: 'row', paddingHorizontal: 20, marginBottom: 16, gap: 8 },
+  tab: {
+    flex: 1,
+    paddingVertical: 9,
+    borderRadius: 10,
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  tabActive: { backgroundColor: Colors.secondary, borderColor: Colors.secondary },
+  tabText: { fontSize: 11, color: Colors.textMuted },
+  tabTextActive: { color: Colors.white, fontWeight: '600' },
+  list: { paddingHorizontal: 20, gap: 12, paddingBottom: 20 },
+  card: {
+    backgroundColor: Colors.surface,
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  cardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 12 },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.primary + '33',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: { color: Colors.primary, fontSize: 18, fontWeight: '700' },
+  cardInfo: { flex: 1 },
+  cardTitle: { fontSize: 14, fontWeight: '600', color: Colors.white },
+  cardLocation: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  cardDate: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
+  badge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
+  badgeText: { fontSize: 11, fontWeight: '600' },
+  cardActions: { flexDirection: 'row', gap: 10 },
+  viewBtn: {
+    flex: 1,
+    height: 36,
+    backgroundColor: Colors.secondary,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewBtnText: { color: Colors.white, fontSize: 13, fontWeight: '600' },
+  refuseBtn: {
+    flex: 1,
+    height: 36,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  refuseBtnText: { color: Colors.textMuted, fontSize: 13 },
+  empty: { paddingTop: 60, alignItems: 'center' },
+  emptyText: { color: Colors.textMuted, fontSize: 15 },
+});

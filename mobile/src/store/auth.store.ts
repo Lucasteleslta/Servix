@@ -1,37 +1,54 @@
 import { create } from 'zustand';
-import { User } from '@/types/models';
-import { authService } from '@/services/auth.service';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import * as SecureStore from 'expo-secure-store';
+import { User } from '../types/models';
 
 interface AuthState {
   user: User | null;
   token: string | null;
-  isLoading: boolean;
-
+  isAuthenticated: boolean;
   setAuth: (user: User, token: string) => void;
-  logout: () => Promise<void>;
-  restoreSession: () => Promise<void>;
+  logout: () => void;
+  restoreSession: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: null,
-  isLoading: true,
-
-  setAuth: (user, token) => set({ user, token }),
-
-  logout: async () => {
-    await authService.logout();
-    set({ user: null, token: null });
+const secureStorage = createJSONStorage(() => ({
+  getItem: async (key: string) => {
+    return await SecureStore.getItemAsync(key);
   },
-
-  restoreSession: async () => {
-    try {
-      const stored = await authService.getStoredAuth();
-      if (stored) {
-        set({ user: stored.user, token: stored.token });
-      }
-    } finally {
-      set({ isLoading: false });
-    }
+  setItem: async (key: string, value: string) => {
+    await SecureStore.setItemAsync(key, value);
+  },
+  removeItem: async (key: string) => {
+    await SecureStore.deleteItemAsync(key);
   },
 }));
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+
+      setAuth: (user, token) => {
+        set({ user, token, isAuthenticated: true });
+      },
+
+      logout: () => {
+        set({ user: null, token: null, isAuthenticated: false });
+      },
+
+      restoreSession: () => {
+        const { token, user } = get();
+        if (token && user) {
+          set({ isAuthenticated: true });
+        }
+      },
+    }),
+    {
+      name: 'auth-storage',
+      storage: secureStorage,
+    }
+  )
+);

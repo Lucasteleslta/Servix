@@ -1,12 +1,10 @@
-export type UserRole = 'CLIENT' | 'PROVIDER' | 'ADMIN';
-
 export interface User {
   id: string;
   name: string;
   email: string;
   phone?: string;
-  role: UserRole;
-  avatarUrl?: string;
+  role: 'CLIENT' | 'PROVIDER' | null;
+  avatar?: string;
   createdAt: string;
 }
 
@@ -14,18 +12,21 @@ export interface Provider {
   id: string;
   userId: string;
   name: string;
-  email: string;
-  phone?: string;
-  category: string;
-  description?: string;
-  hourlyRate?: number;
-  rating?: number;
-  totalReviews?: number;
-  latitude?: number;
-  longitude?: number;
-  isAvailable: boolean;
-  avatarUrl?: string;
-  createdAt: string;
+  avatar?: string;
+  specialty: string;
+  bio?: string;
+  rating: number;
+  reviewCount: number;
+  city: string;
+  available: boolean;
+  services: string[];
+  portfolio?: string[];
+}
+
+export interface ServiceCategory {
+  id: string;
+  name: string;
+  icon: string;
 }
 
 export type RequestStatus =
@@ -35,6 +36,8 @@ export type RequestStatus =
   | 'COMPLETED'
   | 'CANCELLED';
 
+export type UrgencyLevel = 'NORMAL' | 'URGENT';
+
 export interface ServiceRequest {
   id: string;
   clientId: string;
@@ -42,13 +45,11 @@ export interface ServiceRequest {
   title: string;
   description: string;
   category: string;
+  address: string;
+  preferredDate?: string;
+  urgency: UrgencyLevel;
   status: RequestStatus;
-  scheduledAt?: string;
-  address?: string;
-  latitude?: number;
-  longitude?: number;
-  budgetMin?: number;
-  budgetMax?: number;
+  photos?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -57,10 +58,13 @@ export interface Proposal {
   id: string;
   requestId: string;
   providerId: string;
-  provider?: Provider;
+  description: string;
   price: number;
-  estimatedDuration?: string;
-  message?: string;
+  availableDate: string;
+  estimatedDays: number;
+  includesLabor: boolean;
+  includesMaterials: boolean;
+  includesWarranty: boolean;
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
 }
@@ -68,8 +72,8 @@ export interface Proposal {
 export interface Review {
   id: string;
   requestId: string;
-  reviewerId: string;
-  revieweeId: string;
+  clientId: string;
+  providerId: string;
   rating: number;
   comment?: string;
   createdAt: string;
@@ -79,21 +83,13 @@ export interface ChatMessage {
   id: string;
   requestId: string;
   senderId: string;
-  receiverId: string;
   content: string;
-  type: 'TEXT' | 'IMAGE' | 'LOCATION';
-  readAt?: string;
+  type: 'TEXT' | 'PROPOSAL';
+  proposalId?: string;
   createdAt: string;
 }
 
 export interface AuthResponse {
-  user: User;
   token: string;
-  refreshToken?: string;
-}
-
-export interface ProviderStats {
-  completed: number;
-  earnings: number;
-  rating: number;
+  user: User;
 }
