@@ -75,12 +75,12 @@ export function BookingsScreen() {
           <View style={styles.card}>
             <View style={styles.cardTop}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>P</Text>
+                <Text style={styles.avatarText}>{(item.providerName ?? 'P')[0].toUpperCase()}</Text>
               </View>
               <View style={styles.cardInfo}>
-                <Text style={styles.cardTitle}>{item.title}</Text>
-                <Text style={styles.cardCategory}>{item.category}</Text>
-                <Text style={styles.cardDate}>{item.createdAt}</Text>
+                <Text style={styles.cardTitle}>{item.providerName ?? item.title}</Text>
+                <Text style={styles.cardCategory}>{item.title} · {item.category}</Text>
+                <Text style={styles.cardDate}>{item.scheduledAt ? new Date(item.scheduledAt).toLocaleDateString('pt-BR') : new Date(item.createdAt).toLocaleDateString('pt-BR')}</Text>
               </View>
               <View style={[styles.statusBadge, { backgroundColor: (STATUS_COLORS[item.status] ?? Colors.textMuted) + '22' }]}>
                 <Text style={[styles.statusText, { color: STATUS_COLORS[item.status] ?? Colors.textMuted }]}>
@@ -97,7 +97,7 @@ export function BookingsScreen() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.actionBtnOutline}
-                onPress={() => navigation.navigate('Chat', { requestId: item.id, providerName: 'Prestador' })}
+                onPress={() => navigation.navigate('Chat', { requestId: item.id, providerName: item.providerName ?? 'Prestador' })}
               >
                 <Text style={styles.actionBtnOutlineText}>Chat</Text>
               </TouchableOpacity>

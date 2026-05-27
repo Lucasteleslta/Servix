@@ -7,9 +7,16 @@ interface CreateRequestData {
   category: string;
   address: string;
   preferredDate?: string;
-  urgency: 'NORMAL' | 'URGENT';
+  urgency?: 'NORMAL' | 'URGENT';
   providerId?: string;
   photos?: string[];
+}
+
+/** Extract list from either array or paginated { content: [] } response */
+function extractList(data: any): ServiceRequest[] {
+  if (Array.isArray(data)) return data;
+  if (data?.content && Array.isArray(data.content)) return data.content;
+  return [];
 }
 
 export const requestService = {
@@ -19,13 +26,13 @@ export const requestService = {
   },
 
   getMyRequests: async (): Promise<ServiceRequest[]> => {
-    const { data } = await api.get<ServiceRequest[]>('/requests/my');
-    return data;
+    const { data } = await api.get<any>('/requests/my');
+    return extractList(data);
   },
 
   getReceivedRequests: async (): Promise<ServiceRequest[]> => {
-    const { data } = await api.get<ServiceRequest[]>('/requests/received');
-    return data;
+    const { data } = await api.get<any>('/requests/received');
+    return extractList(data);
   },
 
   accept: async (id: string): Promise<ServiceRequest> => {

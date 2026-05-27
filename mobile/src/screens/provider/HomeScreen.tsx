@@ -68,13 +68,11 @@ export function ProviderHomeScreen() {
                 <Text style={styles.clientAvatarText}>C</Text>
               </View>
               <View style={styles.requestInfo}>
-                <Text style={styles.requestTitle}>{req.title}</Text>
+                <Text style={styles.requestTitle}>{req.clientName ?? 'Cliente'} — {req.title}</Text>
                 <Text style={styles.requestLocation}>📍 {req.address}</Text>
               </View>
-              <View style={[styles.urgencyBadge, req.urgency === 'URGENT' ? styles.urgentBadge : styles.normalBadge]}>
-                <Text style={[styles.urgencyText, req.urgency === 'URGENT' ? styles.urgentText : styles.normalText]}>
-                  {req.urgency === 'URGENT' ? 'Urgente' : 'Nova'}
-                </Text>
+              <View style={[styles.urgencyBadge, styles.normalBadge]}>
+                <Text style={[styles.urgencyText, styles.normalText]}>Nova</Text>
               </View>
             </View>
             <View style={styles.requestActions}>

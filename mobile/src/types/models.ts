@@ -11,14 +11,22 @@ export interface User {
 export interface Provider {
   id: string;
   userId: string;
+  // API returns userName; service layer normalises to name
   name: string;
+  userName?: string;
   avatar?: string;
+  avatarUrl?: string;
+  // API returns category; specialty is the normalised alias
   specialty: string;
+  category?: string;
   bio?: string;
+  description?: string;
   rating: number;
   reviewCount: number;
+  totalReviews?: number;
   city: string;
   available: boolean;
+  hourlyRate?: number;
   services: string[];
   portfolio?: string[];
 }
@@ -41,14 +49,20 @@ export type UrgencyLevel = 'NORMAL' | 'URGENT';
 export interface ServiceRequest {
   id: string;
   clientId: string;
+  clientName?: string;
   providerId?: string;
+  providerName?: string;
   title: string;
   description: string;
   category: string;
   address: string;
   preferredDate?: string;
-  urgency: UrgencyLevel;
+  scheduledAt?: string;
+  urgency?: UrgencyLevel;
   status: RequestStatus;
+  budgetMin?: number;
+  budgetMax?: number;
+  proposalCount?: number;
   photos?: string[];
   createdAt: string;
   updatedAt: string;
