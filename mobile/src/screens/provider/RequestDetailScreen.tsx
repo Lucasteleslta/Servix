@@ -1,16 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
+import { requestService } from '../../services/request.service';
+import { ServiceRequest } from '../../types/models';
 import { ProviderRootParamList } from '../../navigation/ProviderNavigator';
 
 type Props = {
@@ -20,6 +24,51 @@ type Props = {
 
 export function RequestDetailScreen({ navigation, route }: Props) {
   const { requestId } = route.params;
+  const [request, setRequest] = useState<ServiceRequest | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    requestService.getById(requestId)
+      .then(setRequest)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [requestId]);
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '–';
+    return new Date(dateStr).toLocaleDateString('pt-BR');
+  };
+
+  const handleAccept = async () => {
+    try {
+      await requestService.accept(requestId);
+      Alert.alert('Aceito!', 'Você aceitou esta solicitação.', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+    } catch {
+      Alert.alert('Erro', 'Não foi possível aceitar a solicitação.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Detalhes do Pedido</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator color={Colors.secondary} size="large" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const clientName = request?.clientName ?? 'Cliente';
+  const clientInitial = clientName[0]?.toUpperCase() ?? 'C';
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
@@ -35,11 +84,11 @@ export function RequestDetailScreen({ navigation, route }: Props) {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.clientCard}>
           <View style={styles.clientAvatar}>
-            <Text style={styles.clientAvatarText}>J</Text>
+            <Text style={styles.clientAvatarText}>{clientInitial}</Text>
           </View>
           <View style={styles.clientInfo}>
-            <Text style={styles.clientName}>João Mendes</Text>
-            <Text style={styles.clientMeta}>12 serviços realizados</Text>
+            <Text style={styles.clientName}>{clientName}</Text>
+            <Text style={styles.clientMeta}>Cliente Servix</Text>
           </View>
         </View>
 
@@ -47,18 +96,26 @@ export function RequestDetailScreen({ navigation, route }: Props) {
           <Text style={styles.sectionTitle}>Detalhes do serviço</Text>
           <View style={styles.detailCard}>
             <View style={styles.detailRow}>
-              <Text style={styles.detailIcon}>⚡</Text>
+              <Text style={styles.detailIcon}>🔧</Text>
               <View>
                 <Text style={styles.detailLabel}>Serviço</Text>
-                <Text style={styles.detailValue}>Instalação de tomadas</Text>
+                <Text style={styles.detailValue}>{request?.title ?? '–'}</Text>
+              </View>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.detailRow}>
+              <Text style={styles.detailIcon}>📂</Text>
+              <View>
+                <Text style={styles.detailLabel}>Categoria</Text>
+                <Text style={styles.detailValue}>{request?.category ?? '–'}</Text>
               </View>
             </View>
             <View style={styles.divider} />
             <View style={styles.detailRow}>
               <Text style={styles.detailIcon}>📍</Text>
-              <View>
+              <View style={{ flex: 1 }}>
                 <Text style={styles.detailLabel}>Local</Text>
-                <Text style={styles.detailValue}>R. das Flores, 123 - SP</Text>
+                <Text style={styles.detailValue}>{request?.address ?? '–'}</Text>
               </View>
             </View>
             <View style={styles.divider} />
@@ -66,37 +123,18 @@ export function RequestDetailScreen({ navigation, route }: Props) {
               <Text style={styles.detailIcon}>📅</Text>
               <View>
                 <Text style={styles.detailLabel}>Data preferida</Text>
-                <Text style={styles.detailValue}>28/05/2026</Text>
-              </View>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.detailRow}>
-              <Text style={styles.detailIcon}>⚠️</Text>
-              <View>
-                <Text style={styles.detailLabel}>Urgência</Text>
-                <Text style={[styles.detailValue, { color: Colors.error }]}>Urgente</Text>
+                <Text style={styles.detailValue}>{formatDate(request?.preferredDate ?? request?.scheduledAt)}</Text>
               </View>
             </View>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Descrição</Text>
-          <Text style={styles.description}>
-            Preciso instalar 4 tomadas novas na sala e no quarto. As tomadas antigas pararam de funcionar. Tenho o material, só preciso da mão de obra.
-          </Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Fotos anexadas</Text>
-          <View style={styles.photosGrid}>
-            {[1, 2, 3].map((i) => (
-              <View key={i} style={styles.photoItem}>
-                <Text style={styles.photoPlaceholder}>📷</Text>
-              </View>
-            ))}
+        {request?.description ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Descrição</Text>
+            <Text style={styles.description}>{request.description}</Text>
           </View>
-        </View>
+        ) : null}
 
         <View style={styles.actions}>
           <TouchableOpacity
@@ -106,8 +144,14 @@ export function RequestDetailScreen({ navigation, route }: Props) {
             <Text style={styles.primaryBtnText}>Enviar proposta / orçamento</Text>
           </TouchableOpacity>
           <TouchableOpacity
+            style={styles.secondaryBtn}
+            onPress={handleAccept}
+          >
+            <Text style={styles.secondaryBtnText}>Aceitar pedido</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             style={styles.outlineBtn}
-            onPress={() => navigation.navigate('ProviderChat', { requestId, clientName: 'João Mendes' })}
+            onPress={() => navigation.navigate('ProviderChat', { requestId, clientName })}
           >
             <Text style={styles.outlineBtnText}>Conversar antes</Text>
           </TouchableOpacity>
@@ -133,6 +177,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   headerTitle: { fontSize: 17, fontWeight: '700', color: Colors.white },
+  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { flex: 1, paddingHorizontal: 20 },
   clientCard: {
     flexDirection: 'row',
@@ -174,21 +219,9 @@ const styles = StyleSheet.create({
   },
   detailIcon: { fontSize: 20, width: 28, textAlign: 'center' },
   detailLabel: { fontSize: 12, color: Colors.textMuted },
-  detailValue: { fontSize: 14, color: Colors.textSecondary, fontWeight: '500', marginTop: 2 },
+  detailValue: { fontSize: 14, color: Colors.white, fontWeight: '500', marginTop: 2 },
   divider: { height: 1, backgroundColor: Colors.border, marginHorizontal: 14 },
   description: { fontSize: 14, color: Colors.textMuted, lineHeight: 22 },
-  photosGrid: { flexDirection: 'row', gap: 10 },
-  photoItem: {
-    width: 90,
-    height: 90,
-    backgroundColor: Colors.surface,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  photoPlaceholder: { fontSize: 28 },
   actions: { marginTop: 28, gap: 12 },
   primaryBtn: {
     backgroundColor: Colors.secondary,
@@ -198,6 +231,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   primaryBtnText: { color: Colors.white, fontSize: 16, fontWeight: '600' },
+  secondaryBtn: {
+    backgroundColor: Colors.primary,
+    height: 52,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryBtnText: { color: Colors.white, fontSize: 16, fontWeight: '600' },
   outlineBtn: {
     height: 52,
     borderRadius: 12,
@@ -206,5 +247,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  outlineBtnText: { color: Colors.textSecondary, fontSize: 16 },
+  outlineBtnText: { color: Colors.textMuted, fontSize: 16 },
 });

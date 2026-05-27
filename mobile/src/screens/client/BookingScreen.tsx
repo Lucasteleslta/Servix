@@ -39,7 +39,7 @@ export function BookingScreen({ navigation, route }: Props) {
     }
     try {
       setLoading(true);
-      await requestService.create({
+      const created = await requestService.create({
         title: serviceType,
         description,
         category: serviceType,
@@ -48,7 +48,7 @@ export function BookingScreen({ navigation, route }: Props) {
         urgency,
         providerId,
       });
-      navigation.navigate('Confirmation');
+      navigation.navigate('Confirmation', { requestId: created.id });
     } catch {
       Alert.alert('Erro', 'Não foi possível enviar a solicitação.');
     } finally {

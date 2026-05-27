@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,15 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
+import { chatService, ChatMessage } from '../../services/chat.service';
+import { useAuthStore } from '../../store/auth.store';
 import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
 type Props = {
@@ -21,67 +24,52 @@ type Props = {
   route: RouteProp<ClientRootParamList, 'Chat'>;
 };
 
-interface Message {
-  id: string;
-  text: string;
-  isMe: boolean;
-  type?: 'text' | 'proposal';
-  time: string;
-}
-
-const INITIAL_MESSAGES: Message[] = [
-  { id: '1', text: 'Olá! Vi sua solicitação de instalação elétrica.', isMe: false, time: '10:30', type: 'text' },
-  { id: '2', text: 'Posso ir amanhã ou depois de amanhã pela manhã.', isMe: false, time: '10:31', type: 'text' },
-  { id: '3', text: 'Ótimo! Quanto seria o valor?', isMe: true, time: '10:35', type: 'text' },
-  { id: '4', text: 'proposal', isMe: false, time: '10:36', type: 'proposal' },
-];
-
 export function ChatScreen({ navigation, route }: Props) {
-  const { providerName } = route.params;
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const { requestId, providerName } = route.params;
+  const user = useAuthStore((s) => s.user);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const [text, setText] = useState('');
+  const listRef = useRef<FlatList>(null);
 
-  const handleSend = () => {
-    if (!text.trim()) return;
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        text: text.trim(),
-        isMe: true,
-        type: 'text',
-        time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      },
-    ]);
+  useEffect(() => {
+    chatService.getMessages(requestId)
+      .then(setMessages)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+    chatService.markAsRead(requestId).catch(() => {});
+  }, [requestId]);
+
+  const handleSend = async () => {
+    if (!text.trim() || sending) return;
+    const content = text.trim();
     setText('');
+    setSending(true);
+    try {
+      const msg = await chatService.sendMessage(requestId, content);
+      setMessages((prev) => [...prev, msg]);
+      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+    } catch {
+      setText(content); // restore on failure
+    } finally {
+      setSending(false);
+    }
   };
 
-  const renderMessage = ({ item }: { item: Message }) => {
-    if (item.type === 'proposal') {
-      return (
-        <View style={styles.proposalCard}>
-          <Text style={styles.proposalTitle}>💼 Proposta enviada</Text>
-          <View style={styles.proposalDetails}>
-            <Text style={styles.proposalLabel}>Serviço: Instalação elétrica</Text>
-            <Text style={styles.proposalLabel}>Valor: R$ 250,00</Text>
-            <Text style={styles.proposalLabel}>Prazo: 2 dias</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.proposalBtn}
-            onPress={() => navigation.navigate('Schedule', { providerId: '1' })}
-          >
-            <Text style={styles.proposalBtnText}>Agendar</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
+  const renderMessage = ({ item }: { item: ChatMessage }) => {
+    const isMe = item.senderId === user?.id;
+    const time = new Date(item.createdAt).toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
     return (
-      <View style={[styles.messageRow, item.isMe && styles.messageRowMe]}>
-        <View style={[styles.bubble, item.isMe ? styles.bubbleMe : styles.bubbleThem]}>
-          <Text style={styles.bubbleText}>{item.text}</Text>
+      <View style={[styles.messageRow, isMe && styles.messageRowMe]}>
+        <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
+          <Text style={styles.bubbleText}>{item.content}</Text>
         </View>
-        <Text style={styles.messageTime}>{item.time}</Text>
+        <Text style={styles.messageTime}>{time}</Text>
       </View>
     );
   };
@@ -99,14 +87,10 @@ export function ChatScreen({ navigation, route }: Props) {
             </TouchableOpacity>
             <View style={styles.headerInfo}>
               <View style={styles.headerAvatar}>
-                <Text style={styles.headerAvatarText}>{providerName?.[0] ?? 'P'}</Text>
+                <Text style={styles.headerAvatarText}>{providerName?.[0]?.toUpperCase() ?? 'P'}</Text>
               </View>
               <View>
                 <Text style={styles.headerName}>{providerName}</Text>
-                <View style={styles.onlineRow}>
-                  <View style={styles.onlineDot} />
-                  <Text style={styles.onlineText}>online</Text>
-                </View>
               </View>
             </View>
             <TouchableOpacity>
@@ -114,13 +98,28 @@ export function ChatScreen({ navigation, route }: Props) {
             </TouchableOpacity>
           </View>
 
-          <FlatList
-            data={messages}
-            keyExtractor={(item) => item.id}
-            renderItem={renderMessage}
-            contentContainerStyle={styles.messagesList}
-            showsVerticalScrollIndicator={false}
-          />
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator color={Colors.primary} size="large" />
+            </View>
+          ) : (
+            <FlatList
+              ref={listRef}
+              data={messages}
+              keyExtractor={(item) => item.id}
+              renderItem={renderMessage}
+              contentContainerStyle={styles.messagesList}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>Nenhuma mensagem ainda. Diga olá! 👋</Text>
+                </View>
+              }
+              onContentSizeChange={() => {
+                if (messages.length > 0) listRef.current?.scrollToEnd({ animated: false });
+              }}
+            />
+          )}
 
           <View style={styles.inputRow}>
             <TextInput
@@ -131,7 +130,11 @@ export function ChatScreen({ navigation, route }: Props) {
               onChangeText={setText}
               multiline
             />
-            <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
+            <TouchableOpacity
+              style={[styles.sendBtn, (!text.trim() || sending) && styles.sendBtnDisabled]}
+              onPress={handleSend}
+              disabled={!text.trim() || sending}
+            >
               <Ionicons name="send" size={18} color={Colors.white} />
             </TouchableOpacity>
           </View>
@@ -165,10 +168,10 @@ const styles = StyleSheet.create({
   },
   headerAvatarText: { color: Colors.white, fontSize: 16, fontWeight: '700' },
   headerName: { fontSize: 15, fontWeight: '600', color: Colors.white },
-  onlineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  onlineDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.success },
-  onlineText: { fontSize: 12, color: Colors.success },
-  messagesList: { paddingHorizontal: 16, paddingVertical: 16, gap: 12 },
+  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  messagesList: { paddingHorizontal: 16, paddingVertical: 16, gap: 12, flexGrow: 1 },
+  emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 60 },
+  emptyText: { color: Colors.textMuted, fontSize: 14, textAlign: 'center' },
   messageRow: { alignItems: 'flex-start', maxWidth: '80%' },
   messageRowMe: { alignSelf: 'flex-end', alignItems: 'flex-end' },
   bubble: {
@@ -181,26 +184,6 @@ const styles = StyleSheet.create({
   bubbleThem: { backgroundColor: Colors.inputBackground, borderBottomLeftRadius: 4 },
   bubbleText: { color: Colors.white, fontSize: 14, lineHeight: 20 },
   messageTime: { fontSize: 11, color: Colors.textMuted },
-  proposalCard: {
-    backgroundColor: 'rgba(37,99,235,0.12)',
-    borderWidth: 1,
-    borderColor: Colors.primary,
-    borderRadius: 14,
-    padding: 16,
-    marginVertical: 6,
-    alignSelf: 'flex-start',
-    maxWidth: '85%',
-  },
-  proposalTitle: { fontSize: 15, fontWeight: '700', color: Colors.white, marginBottom: 10 },
-  proposalDetails: { gap: 4, marginBottom: 12 },
-  proposalLabel: { fontSize: 13, color: Colors.textMuted },
-  proposalBtn: {
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  proposalBtnText: { color: Colors.white, fontSize: 14, fontWeight: '600' },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -230,4 +213,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  sendBtnDisabled: { opacity: 0.5 },
 });

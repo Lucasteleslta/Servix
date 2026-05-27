@@ -91,7 +91,7 @@ export function BookingsScreen() {
             <View style={styles.cardActions}>
               <TouchableOpacity
                 style={styles.actionBtn}
-                onPress={() => navigation.navigate('Tracking', { requestId: item.id })}
+                onPress={() => navigation.navigate('Tracking', { requestId: item.id, providerName: item.providerName ?? undefined })}
               >
                 <Text style={styles.actionBtnText}>Acompanhar</Text>
               </TouchableOpacity>

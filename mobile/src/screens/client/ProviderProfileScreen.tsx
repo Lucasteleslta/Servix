@@ -12,6 +12,7 @@ import { RouteProp } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { providerService } from '../../services/provider.service';
+import { favoritesService } from '../../services/favorites.service';
 import { Provider } from '../../types/models';
 import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
@@ -38,10 +39,26 @@ function StarRating({ rating }: { rating: number }) {
 export function ProviderProfileScreen({ navigation, route }: Props) {
   const { providerId } = route.params;
   const [provider, setProvider] = useState<Provider | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     providerService.getById(providerId).then(setProvider).catch(() => {});
+    favoritesService.getAll()
+      .then((list) => setIsFavorite(list.some((f) => f.providerId === providerId)))
+      .catch(() => {});
   }, [providerId]);
+
+  const toggleFavorite = async () => {
+    try {
+      if (isFavorite) {
+        await favoritesService.remove(providerId);
+        setIsFavorite(false);
+      } else {
+        await favoritesService.add(providerId);
+        setIsFavorite(true);
+      }
+    } catch {}
+  };
 
   const p = provider ?? {
     id: providerId,
@@ -64,8 +81,12 @@ export function ProviderProfileScreen({ navigation, route }: Props) {
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color={Colors.white} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.favoriteBtn}>
-            <Ionicons name="heart-outline" size={24} color={Colors.white} />
+          <TouchableOpacity style={styles.favoriteBtn} onPress={toggleFavorite}>
+            <Ionicons
+              name={isFavorite ? 'heart' : 'heart-outline'}
+              size={24}
+              color={isFavorite ? Colors.error : Colors.white}
+            />
           </TouchableOpacity>
           <View style={styles.heroContent}>
             <View style={styles.heroAvatar}>

@@ -15,6 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
+import { requestService } from '../../services/request.service';
 import { ProviderRootParamList } from '../../navigation/ProviderNavigator';
 
 type Props = {
@@ -33,18 +34,31 @@ export function ProposalScreen({ navigation, route }: Props) {
   const [warranty, setWarranty] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!description || !value) {
       Alert.alert('Atenção', 'Preencha descrição e valor.');
       return;
     }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    const price = parseFloat(value.replace(',', '.'));
+    if (isNaN(price) || price <= 0) {
+      Alert.alert('Atenção', 'Insira um valor válido.');
+      return;
+    }
+    try {
+      setLoading(true);
+      await requestService.createProposal(requestId, {
+        price,
+        estimatedDuration: deadline || undefined,
+        message: description,
+      });
       Alert.alert('Proposta enviada!', 'O cliente foi notificado.', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
-    }, 1000);
+    } catch {
+      Alert.alert('Erro', 'Não foi possível enviar a proposta.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

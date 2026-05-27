@@ -26,8 +26,8 @@ export type ClientRootParamList = {
   Booking: { providerId: string };
   Schedule: { providerId?: string };
   Payment: undefined;
-  Confirmation: undefined;
-  Tracking: { requestId: string };
+  Confirmation: { requestId?: string } | undefined;
+  Tracking: { requestId: string; providerName?: string; providerSpecialty?: string };
   Chat: { requestId: string; providerName: string };
   Notifications: undefined;
 };

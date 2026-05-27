@@ -1,53 +1,84 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
+import { requestService } from '../../services/request.service';
+import { ServiceRequest } from '../../types/models';
 import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
 type Props = {
   navigation: NativeStackNavigationProp<ClientRootParamList, 'Confirmation'>;
+  route: RouteProp<ClientRootParamList, 'Confirmation'>;
 };
 
-export function ConfirmationScreen({ navigation }: Props) {
+export function ConfirmationScreen({ navigation, route }: Props) {
+  const requestId = (route.params as any)?.requestId as string | undefined;
+  const [request, setRequest] = useState<ServiceRequest | null>(null);
+  const [loading, setLoading] = useState(!!requestId);
+
+  useEffect(() => {
+    if (!requestId) return;
+    requestService.getById(requestId)
+      .then(setRequest)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [requestId]);
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '–';
+    return new Date(dateStr).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <View style={styles.container}>
         <View style={styles.successCircle}>
           <Text style={styles.checkIcon}>✓</Text>
         </View>
-        <Text style={styles.title}>Contratação confirmada!</Text>
-        <Text style={styles.subtitle}>Seu serviço foi agendado com sucesso</Text>
+        <Text style={styles.title}>Solicitação enviada!</Text>
+        <Text style={styles.subtitle}>Aguarde o prestador aceitar seu pedido</Text>
 
-        <View style={styles.detailsCard}>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Prestador</Text>
-            <Text style={styles.detailValue}>Marco Silva</Text>
+        {loading ? (
+          <ActivityIndicator color={Colors.primary} style={{ marginVertical: 24 }} />
+        ) : (
+          <View style={styles.detailsCard}>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Serviço</Text>
+              <Text style={styles.detailValue}>{request?.title ?? '–'}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Categoria</Text>
+              <Text style={styles.detailValue}>{request?.category ?? '–'}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Data preferida</Text>
+              <Text style={styles.detailValue}>{formatDate(request?.preferredDate ?? request?.scheduledAt)}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Local</Text>
+              <Text style={styles.detailValue} numberOfLines={2}>{request?.address ?? '–'}</Text>
+            </View>
+            <View style={[styles.detailRow, { borderBottomWidth: 0, marginBottom: 0 }]}>
+              <Text style={styles.detailLabel}>Status</Text>
+              <Text style={[styles.detailValue, styles.pendingValue]}>Pendente</Text>
+            </View>
           </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Serviço</Text>
-            <Text style={styles.detailValue}>Instalação elétrica</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Data</Text>
-            <Text style={styles.detailValue}>28/05/2026 às 10:00</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Local</Text>
-            <Text style={styles.detailValue}>R. das Flores, 123</Text>
-          </View>
-          <View style={[styles.detailRow, { borderBottomWidth: 0, marginBottom: 0 }]}>
-            <Text style={styles.detailLabel}>Total</Text>
-            <Text style={[styles.detailValue, styles.totalValue]}>R$ 262,50</Text>
-          </View>
-        </View>
+        )}
 
-        <TouchableOpacity
-          style={styles.primaryBtn}
-          onPress={() => navigation.navigate('Tracking', { requestId: '1' })}
-        >
-          <Text style={styles.primaryBtnText}>Acompanhar serviço</Text>
-        </TouchableOpacity>
+        {requestId && (
+          <TouchableOpacity
+            style={styles.primaryBtn}
+            onPress={() => navigation.navigate('Tracking', { requestId })}
+          >
+            <Text style={styles.primaryBtnText}>Acompanhar serviço</Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
           style={styles.outlineBtn}
@@ -94,14 +125,14 @@ const styles = StyleSheet.create({
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
-    marginBottom: 0,
   },
-  detailLabel: { fontSize: 14, color: Colors.textMuted },
-  detailValue: { fontSize: 14, color: Colors.textSecondary, fontWeight: '500' },
-  totalValue: { color: Colors.primary, fontWeight: '700', fontSize: 15 },
+  detailLabel: { fontSize: 14, color: Colors.textMuted, flex: 1 },
+  detailValue: { fontSize: 14, color: Colors.white, fontWeight: '500', flex: 1, textAlign: 'right' },
+  pendingValue: { color: Colors.warning, fontWeight: '700' },
   primaryBtn: {
     backgroundColor: Colors.primary,
     height: 52,
@@ -121,5 +152,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
   },
-  outlineBtnText: { color: Colors.textSecondary, fontSize: 16 },
+  outlineBtnText: { color: Colors.textMuted, fontSize: 16 },
 });

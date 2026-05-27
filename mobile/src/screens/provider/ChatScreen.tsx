@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,15 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
+import { chatService, ChatMessage } from '../../services/chat.service';
+import { useAuthStore } from '../../store/auth.store';
 import { ProviderRootParamList } from '../../navigation/ProviderNavigator';
 
 type Props = {
@@ -21,37 +24,54 @@ type Props = {
   route: RouteProp<ProviderRootParamList, 'ProviderChat'>;
 };
 
-interface Message {
-  id: string;
-  text: string;
-  isMe: boolean;
-  time: string;
-}
-
-const INITIAL: Message[] = [
-  { id: '1', text: 'Olá! Estou analisando sua solicitação.', isMe: true, time: '10:30' },
-  { id: '2', text: 'Quando o senhor pode ir?', isMe: false, time: '10:32' },
-  { id: '3', text: 'Posso ir amanhã às 9h. Seria bom?', isMe: true, time: '10:33' },
-  { id: '4', text: 'Perfeito! Me confirma o endereço.', isMe: false, time: '10:35' },
-];
-
 export function ProviderChatScreen({ navigation, route }: Props) {
-  const { clientName } = route.params;
-  const [messages, setMessages] = useState<Message[]>(INITIAL);
+  const { requestId, clientName } = route.params;
+  const user = useAuthStore((s) => s.user);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const [text, setText] = useState('');
+  const listRef = useRef<FlatList>(null);
 
-  const handleSend = () => {
-    if (!text.trim()) return;
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        text: text.trim(),
-        isMe: true,
-        time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      },
-    ]);
+  useEffect(() => {
+    chatService.getMessages(requestId)
+      .then(setMessages)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+    chatService.markAsRead(requestId).catch(() => {});
+  }, [requestId]);
+
+  const handleSend = async () => {
+    if (!text.trim() || sending) return;
+    const content = text.trim();
     setText('');
+    setSending(true);
+    try {
+      const msg = await chatService.sendMessage(requestId, content);
+      setMessages((prev) => [...prev, msg]);
+      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+    } catch {
+      setText(content);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const renderMessage = ({ item }: { item: ChatMessage }) => {
+    const isMe = item.senderId === user?.id;
+    const time = new Date(item.createdAt).toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    return (
+      <View style={[styles.messageRow, isMe && styles.messageRowMe]}>
+        <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
+          <Text style={styles.bubbleText}>{item.content}</Text>
+        </View>
+        <Text style={styles.messageTime}>{time}</Text>
+      </View>
+    );
   };
 
   return (
@@ -67,14 +87,10 @@ export function ProviderChatScreen({ navigation, route }: Props) {
           </TouchableOpacity>
           <View style={styles.headerInfo}>
             <View style={styles.headerAvatar}>
-              <Text style={styles.headerAvatarText}>{clientName?.[0] ?? 'C'}</Text>
+              <Text style={styles.headerAvatarText}>{clientName?.[0]?.toUpperCase() ?? 'C'}</Text>
             </View>
             <View>
               <Text style={styles.headerName}>{clientName}</Text>
-              <View style={styles.onlineRow}>
-                <View style={styles.onlineDot} />
-                <Text style={styles.onlineText}>online</Text>
-              </View>
             </View>
           </View>
           <TouchableOpacity>
@@ -82,20 +98,28 @@ export function ProviderChatScreen({ navigation, route }: Props) {
           </TouchableOpacity>
         </View>
 
-        <FlatList
-          data={messages}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={[styles.messageRow, item.isMe && styles.messageRowMe]}>
-              <View style={[styles.bubble, item.isMe ? styles.bubbleMe : styles.bubbleThem]}>
-                <Text style={styles.bubbleText}>{item.text}</Text>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator color={Colors.secondary} size="large" />
+          </View>
+        ) : (
+          <FlatList
+            ref={listRef}
+            data={messages}
+            keyExtractor={(item) => item.id}
+            renderItem={renderMessage}
+            contentContainerStyle={styles.messagesList}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>Nenhuma mensagem ainda. Inicie a conversa! 👋</Text>
               </View>
-              <Text style={styles.messageTime}>{item.time}</Text>
-            </View>
-          )}
-          contentContainerStyle={styles.messagesList}
-          showsVerticalScrollIndicator={false}
-        />
+            }
+            onContentSizeChange={() => {
+              if (messages.length > 0) listRef.current?.scrollToEnd({ animated: false });
+            }}
+          />
+        )}
 
         <View style={styles.inputRow}>
           <TextInput
@@ -106,7 +130,11 @@ export function ProviderChatScreen({ navigation, route }: Props) {
             onChangeText={setText}
             multiline
           />
-          <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
+          <TouchableOpacity
+            style={[styles.sendBtn, (!text.trim() || sending) && styles.sendBtnDisabled]}
+            onPress={handleSend}
+            disabled={!text.trim() || sending}
+          >
             <Ionicons name="send" size={18} color={Colors.white} />
           </TouchableOpacity>
         </View>
@@ -140,10 +168,10 @@ const styles = StyleSheet.create({
   },
   headerAvatarText: { color: Colors.white, fontSize: 16, fontWeight: '700' },
   headerName: { fontSize: 15, fontWeight: '600', color: Colors.white },
-  onlineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  onlineDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.success },
-  onlineText: { fontSize: 12, color: Colors.success },
-  messagesList: { paddingHorizontal: 16, paddingVertical: 16, gap: 12 },
+  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  messagesList: { paddingHorizontal: 16, paddingVertical: 16, gap: 12, flexGrow: 1 },
+  emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 60 },
+  emptyText: { color: Colors.textMuted, fontSize: 14, textAlign: 'center' },
   messageRow: { alignItems: 'flex-start', maxWidth: '80%' },
   messageRowMe: { alignSelf: 'flex-end', alignItems: 'flex-end' },
   bubble: { borderRadius: 16, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 2 },
@@ -180,4 +208,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  sendBtnDisabled: { opacity: 0.5 },
 });
