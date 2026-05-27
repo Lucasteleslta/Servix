@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +21,7 @@ import { NotificationsScreen } from '../screens/client/NotificationsScreen';
 
 export type ClientRootParamList = {
   Tabs: undefined;
+  Search: { category?: string } | undefined;
   ProviderProfile: { providerId: string };
   Booking: { providerId: string };
   Schedule: { providerId?: string };
@@ -55,7 +57,7 @@ function ClientTabs() {
           borderTopColor: Colors.border,
           borderTopWidth: 1,
           height: 64,
-          paddingBottom: 8,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 8,
           paddingTop: 6,
         },
         tabBarActiveTintColor: Colors.primary,
@@ -96,6 +98,7 @@ export function ClientNavigator() {
   return (
     <RootStack.Navigator screenOptions={{ headerShown: false }}>
       <RootStack.Screen name="Tabs" component={ClientTabs} />
+      <RootStack.Screen name="Search" component={SearchScreen} />
       <RootStack.Screen name="ProviderProfile" component={ProviderProfileScreen} />
       <RootStack.Screen name="Booking" component={BookingScreen} />
       <RootStack.Screen name="Schedule" component={ScheduleScreen} />

@@ -67,16 +67,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 100,
+    height: 100,
+    borderRadius: 24,
     backgroundColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 32,
   },
   icon: {
-    fontSize: 56,
+    fontSize: 48,
   },
   title: {
     fontSize: 22,

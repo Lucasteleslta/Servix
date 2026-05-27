@@ -48,7 +48,7 @@ export function ProviderHomeScreen() {
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.greeting}>Olá, {firstName} 🔧</Text>
+            <Text style={styles.greeting}>Olá, {firstName} 👋</Text>
             <Text style={styles.headerSub}>Sua agenda de hoje</Text>
           </View>
           <View style={styles.avatar}>

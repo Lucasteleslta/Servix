@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -45,7 +46,7 @@ function ProviderTabs() {
           borderTopColor: Colors.border,
           borderTopWidth: 1,
           height: 64,
-          paddingBottom: 8,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 8,
           paddingTop: 6,
         },
         tabBarActiveTintColor: Colors.secondary,

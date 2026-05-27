@@ -10,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { CATEGORIES } from '../../constants/categories';
@@ -19,9 +20,15 @@ import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
 const RECENT_SEARCHES = ['Eletricista', 'Encanador', 'Pintor', 'Faxina'];
 
-export function SearchScreen() {
+type Props = {
+  navigation?: NativeStackNavigationProp<ClientRootParamList, 'Search'>;
+  route?: RouteProp<ClientRootParamList, 'Search'>;
+};
+
+export function SearchScreen({ route }: Props) {
   const navigation = useNavigation<NativeStackNavigationProp<ClientRootParamList>>();
-  const [query, setQuery] = useState('');
+  const category = route?.params?.category;
+  const [query, setQuery] = useState(category ?? '');
   const [results, setResults] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(false);
 

@@ -49,7 +49,7 @@ export function HomeScreen() {
 
         <TouchableOpacity
           style={styles.searchBar}
-          onPress={() => navigation.navigate('Notifications')}
+          onPress={() => navigation.navigate('Search')}
         >
           <Ionicons name="search" size={18} color={Colors.textMuted} />
           <Text style={styles.searchPlaceholder}>Buscar serviços...</Text>
@@ -58,7 +58,11 @@ export function HomeScreen() {
         <Text style={styles.sectionTitle}>Categorias</Text>
         <View style={styles.categoriesGrid}>
           {CATEGORIES.map((cat) => (
-            <TouchableOpacity key={cat.id} style={styles.categoryItem}>
+            <TouchableOpacity
+              key={cat.id}
+              style={styles.categoryItem}
+              onPress={() => navigation.navigate('Search', { category: cat.name })}
+            >
               <View style={styles.categoryIcon}>
                 <Text style={styles.categoryEmoji}>{cat.icon}</Text>
               </View>
