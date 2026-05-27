@@ -6,9 +6,15 @@ import {
   Animated,
   ActivityIndicator,
 } from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Colors } from '../constants/colors';
+import { AuthStackParamList } from '../navigation/AuthNavigator';
 
-export function SplashScreen() {
+type Props = {
+  navigation: NativeStackNavigationProp<AuthStackParamList, 'Splash'>;
+};
+
+export function SplashScreen({ navigation }: Props) {
   const progress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -17,6 +23,12 @@ export function SplashScreen() {
       duration: 2000,
       useNativeDriver: false,
     }).start();
+
+    const timer = setTimeout(() => {
+      navigation.replace('Onboarding1');
+    }, 2500);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const width = progress.interpolate({
