@@ -10,12 +10,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
-import { ClientStackParamList } from '../../navigation/ClientNavigator';
+import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
 type Props = {
-  navigation: NativeStackNavigationProp<ClientStackParamList, 'Tracking'>;
-  route: RouteProp<ClientStackParamList, 'Tracking'>;
+  navigation: NativeStackNavigationProp<ClientRootParamList, 'Tracking'>;
+  route: RouteProp<ClientRootParamList, 'Tracking'>;
 };
 
 const TIMELINE = [
@@ -30,12 +31,12 @@ export function TrackingScreen({ navigation, route }: Props) {
   const handleCancel = () => {
     Alert.alert('Cancelar serviço', 'Tem certeza que deseja cancelar?', [
       { text: 'Não', style: 'cancel' },
-      { text: 'Sim, cancelar', style: 'destructive', onPress: () => navigation.navigate('HomeMain') },
+      { text: 'Sim, cancelar', style: 'destructive', onPress: () => navigation.navigate('Tabs') },
     ]);
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color={Colors.white} />
@@ -113,18 +114,18 @@ export function TrackingScreen({ navigation, route }: Props) {
         </TouchableOpacity>
         <View style={{ height: 32 }} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,

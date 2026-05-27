@@ -9,14 +9,15 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { providerService } from '../../services/provider.service';
 import { Provider } from '../../types/models';
-import { ClientStackParamList } from '../../navigation/ClientNavigator';
+import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
 type Props = {
-  navigation: NativeStackNavigationProp<ClientStackParamList, 'ProviderProfile'>;
-  route: RouteProp<ClientStackParamList, 'ProviderProfile'>;
+  navigation: NativeStackNavigationProp<ClientRootParamList, 'ProviderProfile'>;
+  route: RouteProp<ClientRootParamList, 'ProviderProfile'>;
 };
 
 function StarRating({ rating }: { rating: number }) {
@@ -57,87 +58,90 @@ export function ProviderProfileScreen({ navigation, route }: Props) {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.heroHeader}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color={Colors.white} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.favoriteBtn}>
-          <Ionicons name="heart-outline" size={24} color={Colors.white} />
-        </TouchableOpacity>
-        <View style={styles.heroContent}>
-          <View style={styles.heroAvatar}>
-            <Text style={styles.heroAvatarText}>{p?.name?.[0] ?? '?'}</Text>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <View style={styles.heroHeader}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.favoriteBtn}>
+            <Ionicons name="heart-outline" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          <View style={styles.heroContent}>
+            <View style={styles.heroAvatar}>
+              <Text style={styles.heroAvatarText}>{p?.name?.[0] ?? '?'}</Text>
+            </View>
+            <Text style={styles.heroName}>{p.name}</Text>
+            <Text style={styles.heroSpecialty}>{p.specialty}</Text>
+            {p.available && (
+              <View style={styles.availableBadge}>
+                <View style={styles.availableDot} />
+                <Text style={styles.availableText}>Disponível</Text>
+              </View>
+            )}
           </View>
-          <Text style={styles.heroName}>{p.name}</Text>
-          <Text style={styles.heroSpecialty}>{p.specialty}</Text>
-          {p.available && (
-            <View style={styles.availableBadge}>
-              <View style={styles.availableDot} />
-              <Text style={styles.availableText}>Disponível</Text>
-            </View>
-          )}
         </View>
-      </View>
 
-      <View style={styles.ratingRow}>
-        <StarRating rating={p.rating} />
-        <Text style={styles.ratingText}>{p.rating.toFixed(1)}</Text>
-        <Text style={styles.reviewCount}>({p.reviewCount} avaliações)</Text>
-        <Text style={styles.city}>· {p.city}</Text>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Sobre</Text>
-        <Text style={styles.bioText}>{p.bio}</Text>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Serviços</Text>
-        <View style={styles.chips}>
-          {p.services.map((s, i) => (
-            <View key={i} style={styles.chip}>
-              <Text style={styles.chipText}>{s}</Text>
-            </View>
-          ))}
+        <View style={styles.ratingRow}>
+          <StarRating rating={p.rating} />
+          <Text style={styles.ratingText}>{p.rating.toFixed(1)}</Text>
+          <Text style={styles.reviewCount}>({p.reviewCount} avaliações)</Text>
+          <Text style={styles.city}>· {p.city}</Text>
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Portfólio</Text>
-        <View style={styles.portfolio}>
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <View key={i} style={styles.portfolioItem}>
-              <Text style={styles.portfolioPlaceholder}>📷</Text>
-            </View>
-          ))}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Sobre</Text>
+          <Text style={styles.bioText}>{p.bio}</Text>
         </View>
-      </View>
 
-      <View style={styles.actions}>
-        <TouchableOpacity
-          style={styles.primaryBtn}
-          onPress={() => navigation.navigate('Booking', { providerId: p.id })}
-        >
-          <Text style={styles.primaryBtnText}>Solicitar orçamento</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.outlineBtn}
-          onPress={() => navigation.navigate('Chat', { requestId: p.id, providerName: p.name })}
-        >
-          <Text style={styles.outlineBtnText}>Enviar mensagem</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={{ height: 24 }} />
-    </ScrollView>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Serviços</Text>
+          <View style={styles.chips}>
+            {p.services.map((s, i) => (
+              <View key={i} style={styles.chip}>
+                <Text style={styles.chipText}>{s}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Portfólio</Text>
+          <View style={styles.portfolio}>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <View key={i} style={styles.portfolioItem}>
+                <Text style={styles.portfolioPlaceholder}>📷</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={styles.primaryBtn}
+            onPress={() => navigation.navigate('Booking', { providerId: p.id })}
+          >
+            <Text style={styles.primaryBtnText}>Solicitar orçamento</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.outlineBtn}
+            onPress={() => navigation.navigate('Chat', { requestId: p.id, providerName: p.name })}
+          >
+            <Text style={styles.outlineBtnText}>Enviar mensagem</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ height: 24 }} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   heroHeader: {
     backgroundColor: Colors.surface,
-    paddingTop: 60,
+    paddingTop: 20,
     paddingBottom: 28,
     alignItems: 'center',
     borderBottomWidth: 1,
@@ -146,7 +150,7 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     position: 'absolute',
-    top: 60,
+    top: 20,
     left: 16,
     width: 40,
     height: 40,
@@ -157,7 +161,7 @@ const styles = StyleSheet.create({
   },
   favoriteBtn: {
     position: 'absolute',
-    top: 60,
+    top: 20,
     right: 16,
     width: 40,
     height: 40,

@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { useAuthStore } from '../../store/auth.store';
 
@@ -36,6 +37,7 @@ export function ProfileScreen() {
   ];
 
   return (
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <View style={styles.avatar}>
@@ -76,11 +78,13 @@ export function ProfileScreen() {
       </TouchableOpacity>
       <View style={{ height: 32 }} />
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   header: {
     alignItems: 'center',
     paddingTop: 32,

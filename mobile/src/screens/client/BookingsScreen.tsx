@@ -6,15 +6,13 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { requestService } from '../../services/request.service';
 import { ServiceRequest } from '../../types/models';
-import { ClientStackParamList } from '../../navigation/ClientNavigator';
-
-type Props = {
-  navigation: NativeStackNavigationProp<ClientStackParamList, 'HomeMain'>;
-};
+import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
 type Tab = 'active' | 'completed' | 'cancelled';
 
@@ -34,7 +32,13 @@ const STATUS_LABELS: Record<string, string> = {
   ACCEPTED: 'Aceito',
 };
 
-export function BookingsScreen({ navigation }: Props) {
+const MOCK: ServiceRequest[] = [
+  { id: '1', clientId: '1', title: 'Instalação elétrica', description: '', category: 'Elétrica', address: 'R. das Flores, 123', urgency: 'NORMAL', status: 'IN_PROGRESS', createdAt: '2026-05-26', updatedAt: '2026-05-26' },
+  { id: '2', clientId: '1', title: 'Reparo hidráulico', description: '', category: 'Hidráulica', address: 'Av. Brasil, 456', urgency: 'URGENT', status: 'PENDING', createdAt: '2026-05-25', updatedAt: '2026-05-25' },
+];
+
+export function BookingsScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<ClientRootParamList>>();
   const [tab, setTab] = useState<Tab>('active');
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
 
@@ -48,15 +52,10 @@ export function BookingsScreen({ navigation }: Props) {
     return r.status === 'CANCELLED';
   });
 
-  const MOCK: ServiceRequest[] = [
-    { id: '1', clientId: '1', title: 'Instalação elétrica', description: '', category: 'Elétrica', address: 'R. das Flores, 123', urgency: 'NORMAL', status: 'IN_PROGRESS', createdAt: '2026-05-26', updatedAt: '2026-05-26' },
-    { id: '2', clientId: '1', title: 'Reparo hidráulico', description: '', category: 'Hidráulica', address: 'Av. Brasil, 456', urgency: 'URGENT', status: 'PENDING', createdAt: '2026-05-25', updatedAt: '2026-05-25' },
-  ];
-
   const displayData = filtered.length > 0 ? filtered : (tab === 'active' ? MOCK : []);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <Text style={styles.pageTitle}>Meus Serviços</Text>
 
       <View style={styles.tabs}>
@@ -88,9 +87,9 @@ export function BookingsScreen({ navigation }: Props) {
                 <Text style={styles.cardCategory}>{item.category}</Text>
                 <Text style={styles.cardDate}>{item.createdAt}</Text>
               </View>
-              <View style={[styles.statusBadge, { backgroundColor: STATUS_COLORS[item.status] + '22' }]}>
-                <Text style={[styles.statusText, { color: STATUS_COLORS[item.status] }]}>
-                  {STATUS_LABELS[item.status]}
+              <View style={[styles.statusBadge, { backgroundColor: (STATUS_COLORS[item.status] ?? Colors.textMuted) + '22' }]}>
+                <Text style={[styles.statusText, { color: STATUS_COLORS[item.status] ?? Colors.textMuted }]}>
+                  {STATUS_LABELS[item.status] ?? item.status}
                 </Text>
               </View>
             </View>
@@ -116,18 +115,18 @@ export function BookingsScreen({ navigation }: Props) {
           </View>
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
   pageTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: Colors.white,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 16,
     paddingBottom: 16,
   },
   tabs: { flexDirection: 'row', paddingHorizontal: 20, marginBottom: 16, gap: 8 },

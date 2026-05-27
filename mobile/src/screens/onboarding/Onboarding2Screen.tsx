@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 
@@ -10,7 +11,7 @@ type Props = {
 
 export function Onboarding2Screen({ navigation }: Props) {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <TouchableOpacity style={styles.skipBtn} onPress={() => navigation.navigate('Login')}>
         <Text style={styles.skipText}>Pular</Text>
       </TouchableOpacity>
@@ -36,7 +37,7 @@ export function Onboarding2Screen({ navigation }: Props) {
       >
         <Text style={styles.nextText}>Próximo →</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -45,7 +46,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
     paddingHorizontal: 24,
-    paddingTop: 60,
+    paddingTop: 24,
     paddingBottom: 48,
   },
   skipBtn: { alignSelf: 'flex-end' },

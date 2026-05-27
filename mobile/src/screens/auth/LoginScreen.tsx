@@ -11,6 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import { authService } from '../../services/auth.service';
@@ -46,6 +47,7 @@ export function LoginScreen({ navigation }: Props) {
   };
 
   return (
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -109,12 +111,14 @@ export function LoginScreen({ navigation }: Props) {
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  content: { paddingHorizontal: 24, paddingTop: 80, paddingBottom: 40 },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
+  content: { paddingHorizontal: 24, paddingTop: 60, paddingBottom: 40 },
   logo: {
     fontSize: 28,
     fontWeight: '800',

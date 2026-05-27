@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 
@@ -33,7 +34,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
         <Text style={styles.backText}>← Voltar</Text>
       </TouchableOpacity>
@@ -78,7 +79,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
           </View>
         )}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
     paddingHorizontal: 24,
-    paddingTop: 60,
+    paddingTop: 24,
   },
   backBtn: { marginBottom: 32 },
   backText: { color: Colors.primary, fontSize: 15 },

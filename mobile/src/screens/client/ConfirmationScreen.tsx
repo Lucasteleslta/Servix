@@ -1,66 +1,69 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
-import { ClientStackParamList } from '../../navigation/ClientNavigator';
+import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
 type Props = {
-  navigation: NativeStackNavigationProp<ClientStackParamList, 'Confirmation'>;
+  navigation: NativeStackNavigationProp<ClientRootParamList, 'Confirmation'>;
 };
 
 export function ConfirmationScreen({ navigation }: Props) {
   return (
-    <View style={styles.container}>
-      <View style={styles.successCircle}>
-        <Text style={styles.checkIcon}>✓</Text>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <View style={styles.container}>
+        <View style={styles.successCircle}>
+          <Text style={styles.checkIcon}>✓</Text>
+        </View>
+        <Text style={styles.title}>Contratação confirmada!</Text>
+        <Text style={styles.subtitle}>Seu serviço foi agendado com sucesso</Text>
+
+        <View style={styles.detailsCard}>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Prestador</Text>
+            <Text style={styles.detailValue}>Marco Silva</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Serviço</Text>
+            <Text style={styles.detailValue}>Instalação elétrica</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Data</Text>
+            <Text style={styles.detailValue}>28/05/2026 às 10:00</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Local</Text>
+            <Text style={styles.detailValue}>R. das Flores, 123</Text>
+          </View>
+          <View style={[styles.detailRow, { borderBottomWidth: 0, marginBottom: 0 }]}>
+            <Text style={styles.detailLabel}>Total</Text>
+            <Text style={[styles.detailValue, styles.totalValue]}>R$ 262,50</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={styles.primaryBtn}
+          onPress={() => navigation.navigate('Tracking', { requestId: '1' })}
+        >
+          <Text style={styles.primaryBtnText}>Acompanhar serviço</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.outlineBtn}
+          onPress={() => navigation.navigate('Tabs')}
+        >
+          <Text style={styles.outlineBtnText}>Voltar ao início</Text>
+        </TouchableOpacity>
       </View>
-      <Text style={styles.title}>Contratação confirmada!</Text>
-      <Text style={styles.subtitle}>Seu serviço foi agendado com sucesso</Text>
-
-      <View style={styles.detailsCard}>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Prestador</Text>
-          <Text style={styles.detailValue}>Marco Silva</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Serviço</Text>
-          <Text style={styles.detailValue}>Instalação elétrica</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Data</Text>
-          <Text style={styles.detailValue}>28/05/2026 às 10:00</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Local</Text>
-          <Text style={styles.detailValue}>R. das Flores, 123</Text>
-        </View>
-        <View style={[styles.detailRow, { borderBottomWidth: 0, marginBottom: 0 }]}>
-          <Text style={styles.detailLabel}>Total</Text>
-          <Text style={[styles.detailValue, styles.totalValue]}>R$ 262,50</Text>
-        </View>
-      </View>
-
-      <TouchableOpacity
-        style={styles.primaryBtn}
-        onPress={() => navigation.navigate('Tracking', { requestId: '1' })}
-      >
-        <Text style={styles.primaryBtnText}>Acompanhar serviço</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.outlineBtn}
-        onPress={() => navigation.navigate('HomeMain')}
-      >
-        <Text style={styles.outlineBtnText}>Voltar ao início</Text>
-      </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: Colors.background },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',

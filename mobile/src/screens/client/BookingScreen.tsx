@@ -13,13 +13,14 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { requestService } from '../../services/request.service';
-import { ClientStackParamList } from '../../navigation/ClientNavigator';
+import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
 type Props = {
-  navigation: NativeStackNavigationProp<ClientStackParamList, 'Booking'>;
-  route: RouteProp<ClientStackParamList, 'Booking'>;
+  navigation: NativeStackNavigationProp<ClientRootParamList, 'Booking'>;
+  route: RouteProp<ClientRootParamList, 'Booking'>;
 };
 
 export function BookingScreen({ navigation, route }: Props) {
@@ -56,102 +57,105 @@ export function BookingScreen({ navigation, route }: Props) {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={24} color={Colors.white} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Solicitar orçamento</Text>
-          <View style={{ width: 24 }} />
-        </View>
-
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <Text style={styles.label}>Tipo de serviço *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ex: Instalação de tomadas"
-            placeholderTextColor={Colors.textMuted}
-            value={serviceType}
-            onChangeText={setServiceType}
-          />
-
-          <Text style={styles.label}>Descrição *</Text>
-          <TextInput
-            style={[styles.input, styles.textarea]}
-            placeholder="Descreva detalhes do serviço..."
-            placeholderTextColor={Colors.textMuted}
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
-
-          <Text style={styles.label}>Endereço *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Rua, número, bairro, cidade"
-            placeholderTextColor={Colors.textMuted}
-            value={address}
-            onChangeText={setAddress}
-          />
-
-          <Text style={styles.label}>Data preferida</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="DD/MM/AAAA"
-            placeholderTextColor={Colors.textMuted}
-            value={date}
-            onChangeText={setDate}
-          />
-
-          <Text style={styles.label}>Urgência</Text>
-          <View style={styles.urgencyRow}>
-            {(['NORMAL', 'URGENT'] as const).map((u) => (
-              <TouchableOpacity
-                key={u}
-                style={[styles.urgencyChip, urgency === u && styles.urgencyChipActive]}
-                onPress={() => setUrgency(u)}
-              >
-                <Text style={[styles.urgencyText, urgency === u && styles.urgencyTextActive]}>
-                  {u === 'NORMAL' ? 'Normal' : 'Urgente'}
-                </Text>
-              </TouchableOpacity>
-            ))}
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Ionicons name="chevron-back" size={24} color={Colors.white} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Solicitar orçamento</Text>
+            <View style={{ width: 24 }} />
           </View>
 
-          <Text style={styles.label}>Fotos (opcional)</Text>
-          <TouchableOpacity style={styles.uploadArea}>
-            <Ionicons name="camera-outline" size={32} color={Colors.textMuted} />
-            <Text style={styles.uploadText}>Toque para adicionar fotos</Text>
-            <Text style={styles.uploadSubtext}>JPG, PNG até 10MB cada</Text>
-          </TouchableOpacity>
+          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+            <Text style={styles.label}>Tipo de serviço *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ex: Instalação de tomadas"
+              placeholderTextColor={Colors.textMuted}
+              value={serviceType}
+              onChangeText={setServiceType}
+            />
 
-          <TouchableOpacity
-            style={[styles.primaryBtn, loading && styles.btnDisabled]}
-            onPress={handleSubmit}
-            disabled={loading}
-          >
-            <Text style={styles.primaryBtnText}>
-              {loading ? 'Enviando...' : 'Enviar solicitação'}
-            </Text>
-          </TouchableOpacity>
-          <View style={{ height: 32 }} />
-        </ScrollView>
-      </View>
-    </KeyboardAvoidingView>
+            <Text style={styles.label}>Descrição *</Text>
+            <TextInput
+              style={[styles.input, styles.textarea]}
+              placeholder="Descreva detalhes do serviço..."
+              placeholderTextColor={Colors.textMuted}
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+
+            <Text style={styles.label}>Endereço *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Rua, número, bairro, cidade"
+              placeholderTextColor={Colors.textMuted}
+              value={address}
+              onChangeText={setAddress}
+            />
+
+            <Text style={styles.label}>Data preferida</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="DD/MM/AAAA"
+              placeholderTextColor={Colors.textMuted}
+              value={date}
+              onChangeText={setDate}
+            />
+
+            <Text style={styles.label}>Urgência</Text>
+            <View style={styles.urgencyRow}>
+              {(['NORMAL', 'URGENT'] as const).map((u) => (
+                <TouchableOpacity
+                  key={u}
+                  style={[styles.urgencyChip, urgency === u && styles.urgencyChipActive]}
+                  onPress={() => setUrgency(u)}
+                >
+                  <Text style={[styles.urgencyText, urgency === u && styles.urgencyTextActive]}>
+                    {u === 'NORMAL' ? 'Normal' : 'Urgente'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.label}>Fotos (opcional)</Text>
+            <TouchableOpacity style={styles.uploadArea}>
+              <Ionicons name="camera-outline" size={32} color={Colors.textMuted} />
+              <Text style={styles.uploadText}>Toque para adicionar fotos</Text>
+              <Text style={styles.uploadSubtext}>JPG, PNG até 10MB cada</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.primaryBtn, loading && styles.btnDisabled]}
+              onPress={handleSubmit}
+              disabled={loading}
+            >
+              <Text style={styles.primaryBtnText}>
+                {loading ? 'Enviando...' : 'Enviar solicitação'}
+              </Text>
+            </TouchableOpacity>
+            <View style={{ height: 32 }} />
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,

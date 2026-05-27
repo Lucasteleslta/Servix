@@ -12,13 +12,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
-import { ClientStackParamList } from '../../navigation/ClientNavigator';
-import { useAuthStore } from '../../store/auth.store';
+import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
 type Props = {
-  navigation: NativeStackNavigationProp<ClientStackParamList, 'Chat'>;
-  route: RouteProp<ClientStackParamList, 'Chat'>;
+  navigation: NativeStackNavigationProp<ClientRootParamList, 'Chat'>;
+  route: RouteProp<ClientRootParamList, 'Chat'>;
 };
 
 interface Message {
@@ -66,7 +66,10 @@ export function ChatScreen({ navigation, route }: Props) {
             <Text style={styles.proposalLabel}>Valor: R$ 250,00</Text>
             <Text style={styles.proposalLabel}>Prazo: 2 dias</Text>
           </View>
-          <TouchableOpacity style={styles.proposalBtn} onPress={() => navigation.navigate('Schedule', { providerId: '1' })}>
+          <TouchableOpacity
+            style={styles.proposalBtn}
+            onPress={() => navigation.navigate('Schedule', { providerId: '1' })}
+          >
             <Text style={styles.proposalBtnText}>Agendar</Text>
           </TouchableOpacity>
         </View>
@@ -84,67 +87,69 @@ export function ChatScreen({ navigation, route }: Props) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-    >
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={24} color={Colors.white} />
-          </TouchableOpacity>
-          <View style={styles.headerInfo}>
-            <View style={styles.headerAvatar}>
-              <Text style={styles.headerAvatarText}>{providerName?.[0] ?? 'P'}</Text>
-            </View>
-            <View>
-              <Text style={styles.headerName}>{providerName}</Text>
-              <View style={styles.onlineRow}>
-                <View style={styles.onlineDot} />
-                <Text style={styles.onlineText}>online</Text>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Ionicons name="chevron-back" size={24} color={Colors.white} />
+            </TouchableOpacity>
+            <View style={styles.headerInfo}>
+              <View style={styles.headerAvatar}>
+                <Text style={styles.headerAvatarText}>{providerName?.[0] ?? 'P'}</Text>
+              </View>
+              <View>
+                <Text style={styles.headerName}>{providerName}</Text>
+                <View style={styles.onlineRow}>
+                  <View style={styles.onlineDot} />
+                  <Text style={styles.onlineText}>online</Text>
+                </View>
               </View>
             </View>
+            <TouchableOpacity>
+              <Ionicons name="call-outline" size={22} color={Colors.white} />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity>
-            <Ionicons name="call-outline" size={22} color={Colors.white} />
-          </TouchableOpacity>
-        </View>
 
-        <FlatList
-          data={messages}
-          keyExtractor={(item) => item.id}
-          renderItem={renderMessage}
-          contentContainerStyle={styles.messagesList}
-          showsVerticalScrollIndicator={false}
-        />
-
-        <View style={styles.inputRow}>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite uma mensagem..."
-            placeholderTextColor={Colors.textMuted}
-            value={text}
-            onChangeText={setText}
-            multiline
+          <FlatList
+            data={messages}
+            keyExtractor={(item) => item.id}
+            renderItem={renderMessage}
+            contentContainerStyle={styles.messagesList}
+            showsVerticalScrollIndicator={false}
           />
-          <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
-            <Ionicons name="send" size={18} color={Colors.white} />
-          </TouchableOpacity>
+
+          <View style={styles.inputRow}>
+            <TextInput
+              style={styles.input}
+              placeholder="Digite uma mensagem..."
+              placeholderTextColor={Colors.textMuted}
+              value={text}
+              onChangeText={setText}
+              multiline
+            />
+            <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
+              <Ionicons name="send" size={18} color={Colors.white} />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 16,
     paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,

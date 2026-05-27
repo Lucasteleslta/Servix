@@ -7,13 +7,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
-import { ClientStackParamList } from '../../navigation/ClientNavigator';
-
-type Props = {
-  navigation: NativeStackNavigationProp<ClientStackParamList, 'HomeMain'>;
-};
+import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
 const MOCK_FAVORITES = [
   { id: '1', name: 'Marco Silva', specialty: 'Eletricista', rating: 4.9, reviews: 127 },
@@ -22,9 +20,11 @@ const MOCK_FAVORITES = [
   { id: '4', name: 'Julia Santos', specialty: 'Diarista', rating: 4.6, reviews: 57 },
 ];
 
-export function FavoritesScreen({ navigation }: Props) {
+export function FavoritesScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<ClientRootParamList>>();
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <Text style={styles.pageTitle}>Favoritos</Text>
       <FlatList
         data={MOCK_FAVORITES}
@@ -54,18 +54,18 @@ export function FavoritesScreen({ navigation }: Props) {
           </View>
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
   pageTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: Colors.white,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 16,
     paddingBottom: 16,
   },
   list: { paddingHorizontal: 20, gap: 12, paddingBottom: 20 },

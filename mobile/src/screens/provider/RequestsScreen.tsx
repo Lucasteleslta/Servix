@@ -6,15 +6,13 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { requestService } from '../../services/request.service';
 import { ServiceRequest } from '../../types/models';
-import { ProviderStackParamList } from '../../navigation/ProviderNavigator';
-
-type Props = {
-  navigation: NativeStackNavigationProp<ProviderStackParamList, 'ProviderHomeMain'>;
-};
+import { ProviderRootParamList } from '../../navigation/ProviderNavigator';
 
 type Tab = 'new' | 'active' | 'done';
 
@@ -32,7 +30,8 @@ const MOCK: ServiceRequest[] = [
   { id: '3', clientId: 'c3', title: 'Fiação nova', description: 'Refazer a fiação.', category: 'Elétrica', address: 'Rua X, 789', urgency: 'NORMAL', status: 'COMPLETED', createdAt: '2026-05-20', updatedAt: '2026-05-22' },
 ];
 
-export function RequestsScreen({ navigation }: Props) {
+export function RequestsScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<ProviderRootParamList>>();
   const [tab, setTab] = useState<Tab>('new');
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
 
@@ -48,7 +47,7 @@ export function RequestsScreen({ navigation }: Props) {
   });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <Text style={styles.pageTitle}>Pedidos</Text>
 
       <View style={styles.tabs}>
@@ -105,18 +104,18 @@ export function RequestsScreen({ navigation }: Props) {
           </View>
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
   pageTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: Colors.white,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 16,
     paddingBottom: 16,
   },
   tabs: { flexDirection: 'row', paddingHorizontal: 20, marginBottom: 16, gap: 8 },

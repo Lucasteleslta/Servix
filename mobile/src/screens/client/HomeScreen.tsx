@@ -7,19 +7,18 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { CATEGORIES } from '../../constants/categories';
 import { useAuthStore } from '../../store/auth.store';
 import { providerService } from '../../services/provider.service';
 import { Provider } from '../../types/models';
-import { ClientStackParamList } from '../../navigation/ClientNavigator';
+import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
-type Props = {
-  navigation: NativeStackNavigationProp<ClientStackParamList, 'HomeMain'>;
-};
-
-export function HomeScreen({ navigation }: Props) {
+export function HomeScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<ClientRootParamList>>();
   const user = useAuthStore((s) => s.user);
   const [providers, setProviders] = useState<Provider[]>([]);
 
@@ -27,7 +26,6 @@ export function HomeScreen({ navigation }: Props) {
     providerService
       .getFeatured()
       .then((data) => {
-        // Guard against null/undefined items the API might return
         const valid = (data ?? []).filter((p): p is Provider => Boolean(p?.name));
         setProviders(valid);
       })
@@ -37,96 +35,99 @@ export function HomeScreen({ navigation }: Props) {
   const firstName = user?.name?.split(' ')[0] ?? 'você';
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.greeting}>Olá, {firstName} 👋</Text>
-          <Text style={styles.headerSub}>O que precisa hoje?</Text>
-        </View>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{firstName?.[0]?.toUpperCase() ?? '?'}</Text>
-        </View>
-      </View>
-
-      <TouchableOpacity
-        style={styles.searchBar}
-        onPress={() => (navigation as any).navigate('Search')}
-      >
-        <Ionicons name="search" size={18} color={Colors.textMuted} />
-        <Text style={styles.searchPlaceholder}>Buscar serviços...</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.sectionTitle}>Categorias</Text>
-      <View style={styles.categoriesGrid}>
-        {CATEGORIES.map((cat) => (
-          <TouchableOpacity key={cat.id} style={styles.categoryItem}>
-            <View style={styles.categoryIcon}>
-              <Text style={styles.categoryEmoji}>{cat.icon}</Text>
-            </View>
-            <Text style={styles.categoryName}>{cat.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={styles.sectionTitle}>Em destaque</Text>
-      {providers.length === 0 ? (
-        [1, 2, 3].map((i) => (
-          <View key={i} style={styles.providerCard}>
-            <View style={styles.providerAvatar}>
-              <Text style={styles.providerAvatarText}>P</Text>
-            </View>
-            <View style={styles.providerInfo}>
-              <Text style={styles.providerName}>Profissional</Text>
-              <Text style={styles.providerSpecialty}>Especialidade</Text>
-              <View style={styles.providerMeta}>
-                <Text style={styles.providerRating}>⭐ 4.8</Text>
-                <View style={styles.availableBadge}>
-                  <Text style={styles.availableText}>Disponível</Text>
-                </View>
-              </View>
-            </View>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.greeting}>Olá, {firstName} 👋</Text>
+            <Text style={styles.headerSub}>O que precisa hoje?</Text>
           </View>
-        ))
-      ) : (
-        providers.map((p) => (
-          <TouchableOpacity
-            key={p?.id ?? Math.random().toString()}
-            style={styles.providerCard}
-            onPress={() => p?.id && navigation.navigate('ProviderProfile', { providerId: p.id })}
-          >
-            <View style={styles.providerAvatar}>
-              <Text style={styles.providerAvatarText}>{p?.name?.[0] ?? '?'}</Text>
-            </View>
-            <View style={styles.providerInfo}>
-              <Text style={styles.providerName}>{p?.name ?? '—'}</Text>
-              <Text style={styles.providerSpecialty}>{p?.specialty ?? ''}</Text>
-              <View style={styles.providerMeta}>
-                <Text style={styles.providerRating}>
-                  ⭐ {p?.rating != null ? p.rating.toFixed(1) : '—'}
-                </Text>
-                {p?.available === true && (
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{firstName?.[0]?.toUpperCase() ?? '?'}</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={styles.searchBar}
+          onPress={() => navigation.navigate('Notifications')}
+        >
+          <Ionicons name="search" size={18} color={Colors.textMuted} />
+          <Text style={styles.searchPlaceholder}>Buscar serviços...</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.sectionTitle}>Categorias</Text>
+        <View style={styles.categoriesGrid}>
+          {CATEGORIES.map((cat) => (
+            <TouchableOpacity key={cat.id} style={styles.categoryItem}>
+              <View style={styles.categoryIcon}>
+                <Text style={styles.categoryEmoji}>{cat.icon}</Text>
+              </View>
+              <Text style={styles.categoryName}>{cat.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.sectionTitle}>Em destaque</Text>
+        {providers.length === 0 ? (
+          [1, 2, 3].map((i) => (
+            <View key={i} style={styles.providerCard}>
+              <View style={styles.providerAvatar}>
+                <Text style={styles.providerAvatarText}>P</Text>
+              </View>
+              <View style={styles.providerInfo}>
+                <Text style={styles.providerName}>Profissional</Text>
+                <Text style={styles.providerSpecialty}>Especialidade</Text>
+                <View style={styles.providerMeta}>
+                  <Text style={styles.providerRating}>⭐ 4.8</Text>
                   <View style={styles.availableBadge}>
                     <Text style={styles.availableText}>Disponível</Text>
                   </View>
-                )}
+                </View>
               </View>
             </View>
-          </TouchableOpacity>
-        ))
-      )}
-      <View style={{ height: 20 }} />
-    </ScrollView>
+          ))
+        ) : (
+          providers.map((p) => (
+            <TouchableOpacity
+              key={p?.id ?? Math.random().toString()}
+              style={styles.providerCard}
+              onPress={() => p?.id && navigation.navigate('ProviderProfile', { providerId: p.id })}
+            >
+              <View style={styles.providerAvatar}>
+                <Text style={styles.providerAvatarText}>{p?.name?.[0] ?? '?'}</Text>
+              </View>
+              <View style={styles.providerInfo}>
+                <Text style={styles.providerName}>{p?.name ?? '—'}</Text>
+                <Text style={styles.providerSpecialty}>{p?.specialty ?? ''}</Text>
+                <View style={styles.providerMeta}>
+                  <Text style={styles.providerRating}>
+                    ⭐ {p?.rating != null ? p.rating.toFixed(1) : '—'}
+                  </Text>
+                  {p?.available === true && (
+                    <View style={styles.availableBadge}>
+                      <Text style={styles.availableText}>Disponível</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
+        <View style={{ height: 20 }} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 16,
     paddingBottom: 16,
   },
   headerLeft: {},

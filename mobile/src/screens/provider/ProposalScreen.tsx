@@ -13,12 +13,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
-import { ProviderStackParamList } from '../../navigation/ProviderNavigator';
+import { ProviderRootParamList } from '../../navigation/ProviderNavigator';
 
 type Props = {
-  navigation: NativeStackNavigationProp<ProviderStackParamList, 'Proposal'>;
-  route: RouteProp<ProviderStackParamList, 'Proposal'>;
+  navigation: NativeStackNavigationProp<ProviderRootParamList, 'Proposal'>;
+  route: RouteProp<ProviderRootParamList, 'Proposal'>;
 };
 
 export function ProposalScreen({ navigation, route }: Props) {
@@ -47,6 +48,7 @@ export function ProposalScreen({ navigation, route }: Props) {
   };
 
   return (
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={styles.container}>
         <View style={styles.header}>
@@ -131,17 +133,19 @@ export function ProposalScreen({ navigation, route }: Props) {
         </ScrollView>
       </View>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,

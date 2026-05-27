@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { authService } from '../../services/auth.service';
 import { useAuthStore } from '../../store/auth.store';
@@ -32,7 +33,7 @@ export function ChooseRoleScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <Text style={styles.title}>Como você vai usar o Servix?</Text>
       <Text style={styles.subtitle}>Escolha seu perfil para personalizar sua experiência</Text>
 
@@ -73,7 +74,7 @@ export function ChooseRoleScreen() {
       >
         <Text style={styles.primaryBtnText}>{loading ? 'Salvando...' : 'Continuar'}</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -82,8 +83,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
     paddingHorizontal: 24,
-    paddingTop: 80,
-    paddingBottom: 48,
+    paddingTop: 40,
+    paddingBottom: 32,
   },
   title: {
     fontSize: 22,

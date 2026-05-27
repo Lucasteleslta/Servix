@@ -9,18 +9,20 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
-import { ProviderStackParamList } from '../../navigation/ProviderNavigator';
+import { ProviderRootParamList } from '../../navigation/ProviderNavigator';
 
 type Props = {
-  navigation: NativeStackNavigationProp<ProviderStackParamList, 'RequestDetail'>;
-  route: RouteProp<ProviderStackParamList, 'RequestDetail'>;
+  navigation: NativeStackNavigationProp<ProviderRootParamList, 'RequestDetail'>;
+  route: RouteProp<ProviderRootParamList, 'RequestDetail'>;
 };
 
 export function RequestDetailScreen({ navigation, route }: Props) {
   const { requestId } = route.params;
 
   return (
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -113,17 +115,19 @@ export function RequestDetailScreen({ navigation, route }: Props) {
         <View style={{ height: 24 }} />
       </ScrollView>
     </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,

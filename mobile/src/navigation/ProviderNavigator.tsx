@@ -13,34 +13,29 @@ import { ProviderScheduleScreen } from '../screens/provider/ScheduleScreen';
 import { ProviderProfileScreen } from '../screens/provider/ProfileScreen';
 import { ProviderChatScreen } from '../screens/provider/ChatScreen';
 
-export type ProviderStackParamList = {
-  ProviderHomeMain: undefined;
+export type ProviderRootParamList = {
+  Tabs: undefined;
   RequestDetail: { requestId: string };
   Proposal: { requestId: string };
   ProviderChat: { requestId: string; clientName: string };
 };
 
-const Stack = createNativeStackNavigator<ProviderStackParamList>();
+const RootStack = createNativeStackNavigator<ProviderRootParamList>();
 const Tab = createBottomTabNavigator();
-
-function ProviderHomeStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="ProviderHomeMain" component={ProviderHomeScreen} />
-      <Stack.Screen name="RequestDetail" component={RequestDetailScreen} />
-      <Stack.Screen name="Proposal" component={ProposalScreen} />
-      <Stack.Screen name="ProviderChat" component={ProviderChatScreen} />
-    </Stack.Navigator>
-  );
-}
 
 type TabIconName = keyof typeof Ionicons.glyphMap;
 
 function tabIcon(focused: boolean, name: TabIconName, outlineName: TabIconName) {
-  return <Ionicons name={focused ? name : outlineName} size={24} color={focused ? Colors.secondary : Colors.textMuted} />;
+  return (
+    <Ionicons
+      name={focused ? name : outlineName}
+      size={24}
+      color={focused ? Colors.secondary : Colors.textMuted}
+    />
+  );
 }
 
-export function ProviderNavigator() {
+function ProviderTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -60,7 +55,7 @@ export function ProviderNavigator() {
     >
       <Tab.Screen
         name="Home"
-        component={ProviderHomeStack}
+        component={ProviderHomeScreen}
         options={{ tabBarIcon: ({ focused }) => tabIcon(focused, 'home', 'home-outline') }}
       />
       <Tab.Screen
@@ -84,5 +79,16 @@ export function ProviderNavigator() {
         options={{ tabBarIcon: ({ focused }) => tabIcon(focused, 'person', 'person-outline') }}
       />
     </Tab.Navigator>
+  );
+}
+
+export function ProviderNavigator() {
+  return (
+    <RootStack.Navigator screenOptions={{ headerShown: false }}>
+      <RootStack.Screen name="Tabs" component={ProviderTabs} />
+      <RootStack.Screen name="RequestDetail" component={RequestDetailScreen} />
+      <RootStack.Screen name="Proposal" component={ProposalScreen} />
+      <RootStack.Screen name="ProviderChat" component={ProviderChatScreen} />
+    </RootStack.Navigator>
   );
 }

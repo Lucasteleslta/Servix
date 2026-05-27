@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 
 interface Notification {
@@ -28,7 +29,7 @@ const NOTIFICATIONS: Notification[] = [
 
 export function NotificationsScreen() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <Text style={styles.pageTitle}>Notificações</Text>
       <FlatList
         data={NOTIFICATIONS}
@@ -48,7 +49,7 @@ export function NotificationsScreen() {
           </TouchableOpacity>
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.white,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 16,
     paddingBottom: 16,
   },
   list: { paddingHorizontal: 20, gap: 8, paddingBottom: 20 },

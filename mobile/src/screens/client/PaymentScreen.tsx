@@ -8,11 +8,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
-import { ClientStackParamList } from '../../navigation/ClientNavigator';
+import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
 type Props = {
-  navigation: NativeStackNavigationProp<ClientStackParamList, 'Payment'>;
+  navigation: NativeStackNavigationProp<ClientRootParamList, 'Payment'>;
 };
 
 type PaymentMethod = 'card' | 'pix' | 'boleto';
@@ -31,6 +32,7 @@ export function PaymentScreen({ navigation }: Props) {
   ];
 
   return (
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -84,17 +86,19 @@ export function PaymentScreen({ navigation }: Props) {
         <View style={{ height: 32 }} />
       </ScrollView>
     </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,

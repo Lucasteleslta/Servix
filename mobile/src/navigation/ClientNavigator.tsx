@@ -18,9 +18,8 @@ import { TrackingScreen } from '../screens/client/TrackingScreen';
 import { ChatScreen } from '../screens/client/ChatScreen';
 import { NotificationsScreen } from '../screens/client/NotificationsScreen';
 
-export type ClientStackParamList = {
-  HomeMain: undefined;
-  Search: undefined;
+export type ClientRootParamList = {
+  Tabs: undefined;
   ProviderProfile: { providerId: string };
   Booking: { providerId: string };
   Schedule: { providerId?: string };
@@ -31,33 +30,22 @@ export type ClientStackParamList = {
   Notifications: undefined;
 };
 
-const Stack = createNativeStackNavigator<ClientStackParamList>();
+const RootStack = createNativeStackNavigator<ClientRootParamList>();
 const Tab = createBottomTabNavigator();
-
-function HomeStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="HomeMain" component={HomeScreen} />
-      <Stack.Screen name="Search" component={SearchScreen} />
-      <Stack.Screen name="ProviderProfile" component={ProviderProfileScreen} />
-      <Stack.Screen name="Booking" component={BookingScreen} />
-      <Stack.Screen name="Schedule" component={ScheduleScreen} />
-      <Stack.Screen name="Payment" component={PaymentScreen} />
-      <Stack.Screen name="Confirmation" component={ConfirmationScreen} />
-      <Stack.Screen name="Tracking" component={TrackingScreen} />
-      <Stack.Screen name="Chat" component={ChatScreen} />
-      <Stack.Screen name="Notifications" component={NotificationsScreen} />
-    </Stack.Navigator>
-  );
-}
 
 type TabIconName = keyof typeof Ionicons.glyphMap;
 
 function tabIcon(focused: boolean, name: TabIconName, outlineName: TabIconName) {
-  return <Ionicons name={focused ? name : outlineName} size={24} color={focused ? Colors.primary : Colors.textMuted} />;
+  return (
+    <Ionicons
+      name={focused ? name : outlineName}
+      size={24}
+      color={focused ? Colors.primary : Colors.textMuted}
+    />
+  );
 }
 
-export function ClientNavigator() {
+function ClientTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -77,7 +65,7 @@ export function ClientNavigator() {
     >
       <Tab.Screen
         name="Início"
-        component={HomeStack}
+        component={HomeScreen}
         options={{ tabBarIcon: ({ focused }) => tabIcon(focused, 'home', 'home-outline') }}
       />
       <Tab.Screen
@@ -101,5 +89,21 @@ export function ClientNavigator() {
         options={{ tabBarIcon: ({ focused }) => tabIcon(focused, 'person', 'person-outline') }}
       />
     </Tab.Navigator>
+  );
+}
+
+export function ClientNavigator() {
+  return (
+    <RootStack.Navigator screenOptions={{ headerShown: false }}>
+      <RootStack.Screen name="Tabs" component={ClientTabs} />
+      <RootStack.Screen name="ProviderProfile" component={ProviderProfileScreen} />
+      <RootStack.Screen name="Booking" component={BookingScreen} />
+      <RootStack.Screen name="Schedule" component={ScheduleScreen} />
+      <RootStack.Screen name="Payment" component={PaymentScreen} />
+      <RootStack.Screen name="Confirmation" component={ConfirmationScreen} />
+      <RootStack.Screen name="Tracking" component={TrackingScreen} />
+      <RootStack.Screen name="Chat" component={ChatScreen} />
+      <RootStack.Screen name="Notifications" component={NotificationsScreen} />
+    </RootStack.Navigator>
   );
 }

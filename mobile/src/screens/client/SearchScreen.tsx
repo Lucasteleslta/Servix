@@ -6,23 +6,21 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { CATEGORIES } from '../../constants/categories';
 import { providerService } from '../../services/provider.service';
 import { Provider } from '../../types/models';
-import { ClientStackParamList } from '../../navigation/ClientNavigator';
-
-type Props = {
-  navigation: NativeStackNavigationProp<ClientStackParamList, 'Search'>;
-};
+import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
 const RECENT_SEARCHES = ['Eletricista', 'Encanador', 'Pintor', 'Faxina'];
 
-export function SearchScreen({ navigation }: Props) {
+export function SearchScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<ClientRootParamList>>();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(false);
@@ -45,98 +43,101 @@ export function SearchScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.searchRow}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={18} color={Colors.textMuted} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Buscar serviços ou profissionais..."
-            placeholderTextColor={Colors.textMuted}
-            value={query}
-            onChangeText={handleSearch}
-            autoFocus
-          />
-          {query.length > 0 && (
-            <TouchableOpacity onPress={() => handleSearch('')}>
-              <Ionicons name="close-circle" size={18} color={Colors.textMuted} />
-            </TouchableOpacity>
-          )}
-        </View>
-        <TouchableOpacity style={styles.filterBtn}>
-          <Ionicons name="options" size={20} color={Colors.white} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {query.length === 0 ? (
-          <>
-            <Text style={styles.sectionTitle}>Buscas recentes</Text>
-            <View style={styles.chips}>
-              {RECENT_SEARCHES.map((term) => (
-                <TouchableOpacity
-                  key={term}
-                  style={styles.chip}
-                  onPress={() => handleSearch(term)}
-                >
-                  <Ionicons name="time-outline" size={14} color={Colors.textMuted} />
-                  <Text style={styles.chipText}>{term}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.sectionTitle}>Categorias populares</Text>
-            <View style={styles.categoriesGrid}>
-              {CATEGORIES.map((cat) => (
-                <TouchableOpacity
-                  key={cat.id}
-                  style={styles.categoryItem}
-                  onPress={() => handleSearch(cat.name)}
-                >
-                  <Text style={styles.categoryEmoji}>{cat.icon}</Text>
-                  <Text style={styles.categoryName}>{cat.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </>
-        ) : (
-          <>
-            <Text style={styles.sectionTitle}>
-              {loading ? 'Buscando...' : `${results.length} resultado(s)`}
-            </Text>
-            {results.filter((p): p is Provider => Boolean(p?.name)).map((p) => (
-              <TouchableOpacity
-                key={p.id}
-                style={styles.resultCard}
-                onPress={() => navigation.navigate('ProviderProfile', { providerId: p.id })}
-              >
-                <View style={styles.resultAvatar}>
-                  <Text style={styles.resultAvatarText}>{p?.name?.[0] ?? '?'}</Text>
-                </View>
-                <View style={styles.resultInfo}>
-                  <Text style={styles.resultName}>{p?.name ?? '—'}</Text>
-                  <Text style={styles.resultSpecialty}>{p?.specialty ?? ''}</Text>
-                  <Text style={styles.resultRating}>
-                    ⭐ {p?.rating != null ? p.rating.toFixed(1) : '—'} · {p?.city ?? ''}
-                  </Text>
-                </View>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <View style={styles.container}>
+        <View style={styles.searchRow}>
+          <View style={styles.searchBar}>
+            <Ionicons name="search" size={18} color={Colors.textMuted} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Buscar serviços ou profissionais..."
+              placeholderTextColor={Colors.textMuted}
+              value={query}
+              onChangeText={handleSearch}
+              autoFocus
+            />
+            {query.length > 0 && (
+              <TouchableOpacity onPress={() => handleSearch('')}>
+                <Ionicons name="close-circle" size={18} color={Colors.textMuted} />
               </TouchableOpacity>
-            ))}
-          </>
-        )}
-        <View style={{ height: 20 }} />
-      </ScrollView>
-    </View>
+            )}
+          </View>
+          <TouchableOpacity style={styles.filterBtn}>
+            <Ionicons name="options" size={20} color={Colors.white} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {query.length === 0 ? (
+            <>
+              <Text style={styles.sectionTitle}>Buscas recentes</Text>
+              <View style={styles.chips}>
+                {RECENT_SEARCHES.map((term) => (
+                  <TouchableOpacity
+                    key={term}
+                    style={styles.chip}
+                    onPress={() => handleSearch(term)}
+                  >
+                    <Ionicons name="time-outline" size={14} color={Colors.textMuted} />
+                    <Text style={styles.chipText}>{term}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={styles.sectionTitle}>Categorias populares</Text>
+              <View style={styles.categoriesGrid}>
+                {CATEGORIES.map((cat) => (
+                  <TouchableOpacity
+                    key={cat.id}
+                    style={styles.categoryItem}
+                    onPress={() => handleSearch(cat.name)}
+                  >
+                    <Text style={styles.categoryEmoji}>{cat.icon}</Text>
+                    <Text style={styles.categoryName}>{cat.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </>
+          ) : (
+            <>
+              <Text style={styles.sectionTitle}>
+                {loading ? 'Buscando...' : `${results.length} resultado(s)`}
+              </Text>
+              {results.filter((p): p is Provider => Boolean(p?.name)).map((p) => (
+                <TouchableOpacity
+                  key={p.id}
+                  style={styles.resultCard}
+                  onPress={() => navigation.navigate('ProviderProfile', { providerId: p.id })}
+                >
+                  <View style={styles.resultAvatar}>
+                    <Text style={styles.resultAvatarText}>{p?.name?.[0] ?? '?'}</Text>
+                  </View>
+                  <View style={styles.resultInfo}>
+                    <Text style={styles.resultName}>{p?.name ?? '—'}</Text>
+                    <Text style={styles.resultSpecialty}>{p?.specialty ?? ''}</Text>
+                    <Text style={styles.resultRating}>
+                      ⭐ {p?.rating != null ? p.rating.toFixed(1) : '—'} · {p?.city ?? ''}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </>
+          )}
+          <View style={{ height: 20 }} />
+        </ScrollView>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 12,
     paddingBottom: 16,
     gap: 12,
   },

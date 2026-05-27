@@ -6,23 +6,22 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { useAuthStore } from '../../store/auth.store';
 import { requestService } from '../../services/request.service';
 import { ServiceRequest } from '../../types/models';
-import { ProviderStackParamList } from '../../navigation/ProviderNavigator';
-
-type Props = {
-  navigation: NativeStackNavigationProp<ProviderStackParamList, 'ProviderHomeMain'>;
-};
+import { ProviderRootParamList } from '../../navigation/ProviderNavigator';
 
 const MOCK_REQUESTS: ServiceRequest[] = [
   { id: '1', clientId: 'c1', title: 'Instalação de tomadas', description: 'Preciso instalar 4 tomadas novas.', category: 'Elétrica', address: 'R. das Flores, 123', urgency: 'URGENT', status: 'PENDING', createdAt: '2026-05-26', updatedAt: '2026-05-26' },
   { id: '2', clientId: 'c2', title: 'Troca de disjuntor', description: 'Disjuntor queimado.', category: 'Elétrica', address: 'Av. Brasil, 456', urgency: 'NORMAL', status: 'PENDING', createdAt: '2026-05-25', updatedAt: '2026-05-25' },
 ];
 
-export function ProviderHomeScreen({ navigation }: Props) {
+export function ProviderHomeScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<ProviderRootParamList>>();
   const user = useAuthStore((s) => s.user);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const firstName = user?.name?.split(' ')[0] ?? 'você';
@@ -45,82 +44,85 @@ export function ProviderHomeScreen({ navigation }: Props) {
   ];
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Olá, {firstName} 🔧</Text>
-          <Text style={styles.headerSub}>Sua agenda de hoje</Text>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>Olá, {firstName} 🔧</Text>
+            <Text style={styles.headerSub}>Sua agenda de hoje</Text>
+          </View>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{firstName?.[0]?.toUpperCase() ?? '?'}</Text>
+          </View>
         </View>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{firstName[0]?.toUpperCase()}</Text>
-        </View>
-      </View>
 
-      <View style={styles.statsGrid}>
-        {STATS.map((s) => (
-          <View key={s.label} style={styles.statCard}>
-            <Text style={[styles.statValue, { color: s.color }]}>{s.value}</Text>
-            <Text style={styles.statLabel}>{s.label}</Text>
+        <View style={styles.statsGrid}>
+          {STATS.map((s) => (
+            <View key={s.label} style={styles.statCard}>
+              <Text style={[styles.statValue, { color: s.color }]}>{s.value}</Text>
+              <Text style={styles.statLabel}>{s.label}</Text>
+            </View>
+          ))}
+        </View>
+
+        <Text style={styles.sectionTitle}>Novas solicitações</Text>
+        {displayRequests.map((req) => (
+          <View key={req.id} style={styles.requestCard}>
+            <View style={styles.requestTop}>
+              <View style={styles.clientAvatar}>
+                <Text style={styles.clientAvatarText}>C</Text>
+              </View>
+              <View style={styles.requestInfo}>
+                <Text style={styles.requestTitle}>{req.title}</Text>
+                <Text style={styles.requestLocation}>📍 {req.address}</Text>
+              </View>
+              <View style={[styles.urgencyBadge, req.urgency === 'URGENT' ? styles.urgentBadge : styles.normalBadge]}>
+                <Text style={[styles.urgencyText, req.urgency === 'URGENT' ? styles.urgentText : styles.normalText]}>
+                  {req.urgency === 'URGENT' ? 'Urgente' : 'Nova'}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.requestActions}>
+              <TouchableOpacity
+                style={styles.viewBtn}
+                onPress={() => navigation.navigate('RequestDetail', { requestId: req.id })}
+              >
+                <Text style={styles.viewBtnText}>Ver</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.refuseBtn}>
+                <Text style={styles.refuseBtnText}>Recusar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ))}
-      </View>
 
-      <Text style={styles.sectionTitle}>Novas solicitações</Text>
-      {displayRequests.map((req) => (
-        <View key={req.id} style={styles.requestCard}>
-          <View style={styles.requestTop}>
-            <View style={styles.clientAvatar}>
-              <Text style={styles.clientAvatarText}>C</Text>
+        <Text style={styles.sectionTitle}>Agenda de hoje</Text>
+        {TODAY_SCHEDULE.map((item, i) => (
+          <View key={i} style={styles.scheduleCard}>
+            <View style={styles.scheduleTime}>
+              <Text style={styles.scheduleTimeText}>{item.time}</Text>
             </View>
-            <View style={styles.requestInfo}>
-              <Text style={styles.requestTitle}>{req.title}</Text>
-              <Text style={styles.requestLocation}>📍 {req.address}</Text>
-            </View>
-            <View style={[styles.urgencyBadge, req.urgency === 'URGENT' ? styles.urgentBadge : styles.normalBadge]}>
-              <Text style={[styles.urgencyText, req.urgency === 'URGENT' ? styles.urgentText : styles.normalText]}>
-                {req.urgency === 'URGENT' ? 'Urgente' : 'Nova'}
-              </Text>
+            <View style={styles.scheduleInfo}>
+              <Text style={styles.scheduleService}>{item.service}</Text>
+              <Text style={styles.scheduleClient}>{item.client}</Text>
             </View>
           </View>
-          <View style={styles.requestActions}>
-            <TouchableOpacity
-              style={styles.viewBtn}
-              onPress={() => navigation.navigate('RequestDetail', { requestId: req.id })}
-            >
-              <Text style={styles.viewBtnText}>Ver</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.refuseBtn}>
-              <Text style={styles.refuseBtnText}>Recusar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      ))}
-
-      <Text style={styles.sectionTitle}>Agenda de hoje</Text>
-      {TODAY_SCHEDULE.map((item, i) => (
-        <View key={i} style={styles.scheduleCard}>
-          <View style={styles.scheduleTime}>
-            <Text style={styles.scheduleTimeText}>{item.time}</Text>
-          </View>
-          <View style={styles.scheduleInfo}>
-            <Text style={styles.scheduleService}>{item.service}</Text>
-            <Text style={styles.scheduleClient}>{item.client}</Text>
-          </View>
-        </View>
-      ))}
-      <View style={{ height: 20 }} />
-    </ScrollView>
+        ))}
+        <View style={{ height: 20 }} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 16,
     paddingBottom: 16,
   },
   greeting: { fontSize: 20, fontWeight: '700', color: Colors.white },

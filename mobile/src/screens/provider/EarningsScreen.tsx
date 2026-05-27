@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 
 const TRANSACTIONS = [
@@ -24,6 +25,7 @@ export function EarningsScreen() {
   ];
 
   return (
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Text style={styles.pageTitle}>Ganhos</Text>
 
@@ -63,17 +65,19 @@ export function EarningsScreen() {
       </View>
       <View style={{ height: 24 }} />
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   pageTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: Colors.white,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 16,
     paddingBottom: 16,
   },
   balanceCard: {

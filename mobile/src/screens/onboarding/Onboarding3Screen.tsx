@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 
@@ -10,7 +11,7 @@ type Props = {
 
 export function Onboarding3Screen({ navigation }: Props) {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.content}>
         <View style={styles.iconContainer}>
           <Text style={styles.icon}>⭐</Text>
@@ -32,7 +33,7 @@ export function Onboarding3Screen({ navigation }: Props) {
       >
         <Text style={styles.nextText}>Começar →</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
     paddingHorizontal: 24,
-    paddingTop: 60,
+    paddingTop: 24,
     paddingBottom: 48,
   },
   content: { flex: 1, alignItems: 'center', justifyContent: 'center' },
