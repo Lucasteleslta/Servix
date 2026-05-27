@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,19 +9,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 
-const TRANSACTIONS = [
-  { id: '1', desc: 'Serviço - Instalação elétrica', value: 250.0, date: '26/05/2026', type: 'credit' },
-  { id: '2', desc: 'Serviço - Troca de disjuntor', value: 180.0, date: '24/05/2026', type: 'credit' },
-  { id: '3', desc: 'Saque para conta bancária', value: 200.0, date: '22/05/2026', type: 'debit' },
-  { id: '4', desc: 'Serviço - Instalação tomadas', value: 120.0, date: '20/05/2026', type: 'credit' },
-  { id: '5', desc: 'Serviço - Quadro elétrico', value: 320.0, date: '18/05/2026', type: 'credit' },
-];
+type Transaction = { id: string; desc: string; value: number; date: string; type: 'credit' | 'debit' };
 
 export function EarningsScreen() {
+  const [transactions] = useState<Transaction[]>([]);
+
   const STATS = [
-    { label: 'Esta semana', value: 'R$ 430,00' },
-    { label: 'Este mês', value: 'R$ 870,00' },
-    { label: 'Total serviços', value: '47' },
+    { label: 'Esta semana', value: 'R$ 0,00' },
+    { label: 'Este mês', value: 'R$ 0,00' },
+    { label: 'Total serviços', value: '0' },
   ];
 
   return (
@@ -31,7 +27,7 @@ export function EarningsScreen() {
 
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Saldo disponível</Text>
-        <Text style={styles.balanceValue}>R$ 670,00</Text>
+        <Text style={styles.balanceValue}>R$ 0,00</Text>
         <TouchableOpacity style={styles.withdrawBtn}>
           <Text style={styles.withdrawBtnText}>Sacar</Text>
         </TouchableOpacity>
@@ -47,8 +43,13 @@ export function EarningsScreen() {
       </View>
 
       <Text style={styles.sectionTitle}>Transações recentes</Text>
+      {transactions.length === 0 && (
+        <View style={styles.emptyTransactions}>
+          <Text style={styles.emptyTransactionsText}>Nenhuma transação registrada</Text>
+        </View>
+      )}
       <View style={styles.transactionsList}>
-        {TRANSACTIONS.map((t) => (
+        {transactions.map((t) => (
           <View key={t.id} style={styles.transactionItem}>
             <View style={[styles.transactionIcon, t.type === 'credit' ? styles.creditIcon : styles.debitIcon]}>
               <Text style={styles.transactionIconText}>{t.type === 'credit' ? '↑' : '↓'}</Text>
@@ -150,4 +151,6 @@ const styles = StyleSheet.create({
   transactionValue: { fontSize: 14, fontWeight: '700' },
   creditValue: { color: Colors.success },
   debitValue: { color: Colors.error },
+  emptyTransactions: { paddingVertical: 24, alignItems: 'center' },
+  emptyTransactionsText: { color: Colors.textMuted, fontSize: 14 },
 });

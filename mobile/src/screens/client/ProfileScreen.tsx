@@ -8,12 +8,16 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { useAuthStore } from '../../store/auth.store';
+import { ClientRootParamList } from '../../navigation/ClientNavigator';
 
 export function ProfileScreen() {
   const { user, logout } = useAuthStore();
+  const navigation = useNavigation<NativeStackNavigationProp<ClientRootParamList>>();
 
   const handleLogout = () => {
     Alert.alert('Sair', 'Deseja realmente sair?', [
@@ -23,17 +27,17 @@ export function ProfileScreen() {
   };
 
   const STATS = [
-    { label: 'Serviços', value: '12' },
-    { label: 'Favoritos', value: '5' },
-    { label: 'Avaliações', value: '8' },
+    { label: 'Serviços', value: '0' },
+    { label: 'Favoritos', value: '0' },
+    { label: 'Avaliações', value: '0' },
   ];
 
   const OPTIONS = [
-    { icon: 'time-outline', label: 'Histórico de serviços' },
-    { icon: 'notifications-outline', label: 'Notificações' },
-    { icon: 'settings-outline', label: 'Configurações' },
-    { icon: 'help-circle-outline', label: 'Ajuda e suporte' },
-    { icon: 'shield-outline', label: 'Privacidade' },
+    { icon: 'time-outline', label: 'Histórico de serviços', onPress: () => navigation.navigate('Tabs') },
+    { icon: 'notifications-outline', label: 'Notificações', onPress: () => navigation.navigate('Notifications') },
+    { icon: 'settings-outline', label: 'Configurações', onPress: () => {} },
+    { icon: 'help-circle-outline', label: 'Ajuda e suporte', onPress: () => {} },
+    { icon: 'shield-outline', label: 'Privacidade', onPress: () => {} },
   ];
 
   return (
@@ -62,7 +66,7 @@ export function ProfileScreen() {
 
       <View style={styles.optionsList}>
         {OPTIONS.map((opt) => (
-          <TouchableOpacity key={opt.label} style={styles.optionItem}>
+          <TouchableOpacity key={opt.label} style={styles.optionItem} onPress={opt.onPress}>
             <View style={styles.optionIcon}>
               <Ionicons name={opt.icon as any} size={20} color={Colors.primary} />
             </View>

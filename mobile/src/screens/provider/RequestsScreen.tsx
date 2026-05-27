@@ -24,23 +24,16 @@ const STATUS_COLORS: Record<string, string> = {
   CANCELLED: Colors.error,
 };
 
-const MOCK: ServiceRequest[] = [
-  { id: '1', clientId: 'c1', title: 'Instalação de tomadas', description: '4 tomadas novas.', category: 'Elétrica', address: 'R. das Flores, 123', urgency: 'URGENT', status: 'PENDING', createdAt: '2026-05-26', updatedAt: '2026-05-26' },
-  { id: '2', clientId: 'c2', title: 'Troca de disjuntor', description: 'Disjuntor queimado.', category: 'Elétrica', address: 'Av. Brasil, 456', urgency: 'NORMAL', status: 'IN_PROGRESS', createdAt: '2026-05-24', updatedAt: '2026-05-24' },
-  { id: '3', clientId: 'c3', title: 'Fiação nova', description: 'Refazer a fiação.', category: 'Elétrica', address: 'Rua X, 789', urgency: 'NORMAL', status: 'COMPLETED', createdAt: '2026-05-20', updatedAt: '2026-05-22' },
-];
-
 export function RequestsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<ProviderRootParamList>>();
   const [tab, setTab] = useState<Tab>('new');
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
 
   useEffect(() => {
-    requestService.getReceivedRequests().then(setRequests).catch(() => setRequests(MOCK));
+    requestService.getReceivedRequests().then(setRequests).catch(() => {});
   }, []);
 
-  const allRequests = requests.length > 0 ? requests : MOCK;
-  const filtered = allRequests.filter((r) => {
+  const filtered = requests.filter((r) => {
     if (tab === 'new') return r.status === 'PENDING';
     if (tab === 'active') return ['ACCEPTED', 'IN_PROGRESS'].includes(r.status);
     return r.status === 'COMPLETED';

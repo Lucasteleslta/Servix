@@ -15,11 +15,6 @@ import { requestService } from '../../services/request.service';
 import { ServiceRequest } from '../../types/models';
 import { ProviderRootParamList } from '../../navigation/ProviderNavigator';
 
-const MOCK_REQUESTS: ServiceRequest[] = [
-  { id: '1', clientId: 'c1', title: 'Instalação de tomadas', description: 'Preciso instalar 4 tomadas novas.', category: 'Elétrica', address: 'R. das Flores, 123', urgency: 'URGENT', status: 'PENDING', createdAt: '2026-05-26', updatedAt: '2026-05-26' },
-  { id: '2', clientId: 'c2', title: 'Troca de disjuntor', description: 'Disjuntor queimado.', category: 'Elétrica', address: 'Av. Brasil, 456', urgency: 'NORMAL', status: 'PENDING', createdAt: '2026-05-25', updatedAt: '2026-05-25' },
-];
-
 export function ProviderHomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<ProviderRootParamList>>();
   const user = useAuthStore((s) => s.user);
@@ -27,28 +22,23 @@ export function ProviderHomeScreen() {
   const firstName = user?.name?.split(' ')[0] ?? 'você';
 
   useEffect(() => {
-    requestService.getReceivedRequests().then(setRequests).catch(() => setRequests(MOCK_REQUESTS));
+    requestService.getReceivedRequests().then(setRequests).catch(() => {});
   }, []);
 
-  const displayRequests = requests.length > 0 ? requests : MOCK_REQUESTS;
-
   const STATS = [
-    { label: 'Solicitações', value: displayRequests.length.toString(), color: Colors.primary },
-    { label: 'Agendados', value: '3', color: Colors.secondary },
-    { label: 'Ganhos', value: 'R$\n1.250', color: Colors.warning },
+    { label: 'Solicitações', value: requests.length.toString(), color: Colors.primary },
+    { label: 'Agendados', value: '0', color: Colors.secondary },
+    { label: 'Ganhos', value: 'R$\n0,00', color: Colors.warning },
   ];
 
-  const TODAY_SCHEDULE = [
-    { time: '09:00', client: 'João M.', service: 'Instalação elétrica' },
-    { time: '14:30', client: 'Ana C.', service: 'Troca de disjuntor' },
-  ];
+  const TODAY_SCHEDULE: { time: string; client: string; service: string }[] = [];
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.greeting}>Olá, {firstName} 👋</Text>
+            <Text style={styles.greeting}>Olá, {firstName} 🔧</Text>
             <Text style={styles.headerSub}>Sua agenda de hoje</Text>
           </View>
           <View style={styles.avatar}>
@@ -66,7 +56,12 @@ export function ProviderHomeScreen() {
         </View>
 
         <Text style={styles.sectionTitle}>Novas solicitações</Text>
-        {displayRequests.map((req) => (
+        {requests.length === 0 && (
+          <View style={styles.emptyRequests}>
+            <Text style={styles.emptyText}>Nenhuma nova solicitação</Text>
+          </View>
+        )}
+        {(requests ?? []).map((req) => (
           <View key={req.id} style={styles.requestCard}>
             <View style={styles.requestTop}>
               <View style={styles.clientAvatar}>
@@ -97,6 +92,11 @@ export function ProviderHomeScreen() {
         ))}
 
         <Text style={styles.sectionTitle}>Agenda de hoje</Text>
+        {TODAY_SCHEDULE.length === 0 && (
+          <View style={styles.emptyRequests}>
+            <Text style={styles.emptyText}>Nenhum agendamento para hoje</Text>
+          </View>
+        )}
         {TODAY_SCHEDULE.map((item, i) => (
           <View key={i} style={styles.scheduleCard}>
             <View style={styles.scheduleTime}>
@@ -230,4 +230,6 @@ const styles = StyleSheet.create({
   scheduleInfo: {},
   scheduleService: { fontSize: 14, fontWeight: '600', color: Colors.white },
   scheduleClient: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  emptyRequests: { padding: 20, alignItems: 'center' },
+  emptyText: { color: Colors.textMuted, fontSize: 14 },
 });

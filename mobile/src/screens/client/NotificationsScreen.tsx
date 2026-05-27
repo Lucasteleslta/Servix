@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 
@@ -28,9 +29,16 @@ const NOTIFICATIONS: Notification[] = [
 ];
 
 export function NotificationsScreen() {
+  const navigation = useNavigation();
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <Text style={styles.pageTitle}>Notificações</Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Ionicons name="chevron-back" size={24} color={Colors.white} />
+        </TouchableOpacity>
+        <Text style={styles.pageTitle}>Notificações</Text>
+        <View style={{ width: 32 }} />
+      </View>
       <FlatList
         data={NOTIFICATIONS}
         keyExtractor={(item) => item.id}
@@ -55,13 +63,19 @@ export function NotificationsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+  backBtn: { padding: 4 },
   pageTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: Colors.white,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 16,
   },
   list: { paddingHorizontal: 20, gap: 8, paddingBottom: 20 },
   card: {

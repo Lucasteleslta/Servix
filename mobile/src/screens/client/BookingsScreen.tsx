@@ -32,11 +32,6 @@ const STATUS_LABELS: Record<string, string> = {
   ACCEPTED: 'Aceito',
 };
 
-const MOCK: ServiceRequest[] = [
-  { id: '1', clientId: '1', title: 'Instalação elétrica', description: '', category: 'Elétrica', address: 'R. das Flores, 123', urgency: 'NORMAL', status: 'IN_PROGRESS', createdAt: '2026-05-26', updatedAt: '2026-05-26' },
-  { id: '2', clientId: '1', title: 'Reparo hidráulico', description: '', category: 'Hidráulica', address: 'Av. Brasil, 456', urgency: 'URGENT', status: 'PENDING', createdAt: '2026-05-25', updatedAt: '2026-05-25' },
-];
-
 export function BookingsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<ClientRootParamList>>();
   const [tab, setTab] = useState<Tab>('active');
@@ -52,7 +47,7 @@ export function BookingsScreen() {
     return r.status === 'CANCELLED';
   });
 
-  const displayData = filtered.length > 0 ? filtered : (tab === 'active' ? MOCK : []);
+  const displayData = filtered;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>

@@ -8,12 +8,16 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { useAuthStore } from '../../store/auth.store';
+import { ProviderRootParamList } from '../../navigation/ProviderNavigator';
 
 export function ProviderProfileScreen() {
   const { user, logout } = useAuthStore();
+  const navigation = useNavigation<NativeStackNavigationProp<ProviderRootParamList>>();
 
   const handleLogout = () => {
     Alert.alert('Sair', 'Deseja realmente sair?', [
@@ -23,18 +27,18 @@ export function ProviderProfileScreen() {
   };
 
   const STATS = [
-    { label: 'Serviços', value: '47' },
-    { label: 'Avaliação', value: '4.9' },
-    { label: 'Clientes', value: '38' },
+    { label: 'Serviços', value: '0' },
+    { label: 'Avaliação', value: '5.0' },
+    { label: 'Clientes', value: '0' },
   ];
 
   const OPTIONS = [
-    { icon: 'star-outline', label: 'Avaliações recebidas' },
-    { icon: 'construct-outline', label: 'Meus serviços' },
-    { icon: 'camera-outline', label: 'Portfólio' },
-    { icon: 'notifications-outline', label: 'Notificações' },
-    { icon: 'settings-outline', label: 'Configurações' },
-    { icon: 'help-circle-outline', label: 'Ajuda e suporte' },
+    { icon: 'star-outline', label: 'Avaliações recebidas', onPress: () => {} },
+    { icon: 'construct-outline', label: 'Meus serviços', onPress: () => {} },
+    { icon: 'camera-outline', label: 'Portfólio', onPress: () => {} },
+    { icon: 'notifications-outline', label: 'Notificações', onPress: () => {} },
+    { icon: 'settings-outline', label: 'Configurações', onPress: () => {} },
+    { icon: 'help-circle-outline', label: 'Ajuda e suporte', onPress: () => {} },
   ];
 
   return (
@@ -64,7 +68,7 @@ export function ProviderProfileScreen() {
 
       <View style={styles.optionsList}>
         {OPTIONS.map((opt) => (
-          <TouchableOpacity key={opt.label} style={styles.optionItem}>
+          <TouchableOpacity key={opt.label} style={styles.optionItem} onPress={opt.onPress}>
             <View style={styles.optionIcon}>
               <Ionicons name={opt.icon as any} size={20} color={Colors.secondary} />
             </View>

@@ -22,15 +22,7 @@ function buildCalendar() {
   return { cells, today: today.getDate(), month, year };
 }
 
-const SCHEDULE: Record<number, { time: string; client: string; service: string; color: string }[]> = {
-  26: [
-    { time: '09:00', client: 'João M.', service: 'Instalação elétrica', color: Colors.primary },
-    { time: '14:30', client: 'Ana C.', service: 'Troca de disjuntor', color: Colors.secondary },
-  ],
-  27: [
-    { time: '10:00', client: 'Pedro L.', service: 'Reparo em tomada', color: Colors.warning },
-  ],
-};
+const SCHEDULE: Record<number, { time: string; client: string; service: string; color: string }[]> = {};
 
 export function ProviderScheduleScreen() {
   const [view, setView] = useState<'week' | 'month'>('week');

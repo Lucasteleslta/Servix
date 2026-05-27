@@ -42,8 +42,13 @@ export function HomeScreen() {
             <Text style={styles.greeting}>Olá, {firstName} 👋</Text>
             <Text style={styles.headerSub}>O que precisa hoje?</Text>
           </View>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{firstName?.[0]?.toUpperCase() ?? '?'}</Text>
+          <View style={styles.headerRight}>
+            <TouchableOpacity onPress={() => navigation.navigate('Notifications')} style={styles.bellBtn}>
+              <Ionicons name="notifications-outline" size={22} color={Colors.white} />
+            </TouchableOpacity>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{firstName?.[0]?.toUpperCase() ?? '?'}</Text>
+            </View>
           </View>
         </View>
 
@@ -73,23 +78,10 @@ export function HomeScreen() {
 
         <Text style={styles.sectionTitle}>Em destaque</Text>
         {providers.length === 0 ? (
-          [1, 2, 3].map((i) => (
-            <View key={i} style={styles.providerCard}>
-              <View style={styles.providerAvatar}>
-                <Text style={styles.providerAvatarText}>P</Text>
-              </View>
-              <View style={styles.providerInfo}>
-                <Text style={styles.providerName}>Profissional</Text>
-                <Text style={styles.providerSpecialty}>Especialidade</Text>
-                <View style={styles.providerMeta}>
-                  <Text style={styles.providerRating}>⭐ 4.8</Text>
-                  <View style={styles.availableBadge}>
-                    <Text style={styles.availableText}>Disponível</Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-          ))
+          <View style={styles.emptyProviders}>
+            <Text style={styles.emptyProvidersText}>Nenhum prestador em destaque</Text>
+            <Text style={styles.emptyProvidersSubText}>Busque por serviços usando a barra acima</Text>
+          </View>
         ) : (
           providers.map((p) => (
             <TouchableOpacity
@@ -135,6 +127,8 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   headerLeft: {},
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  bellBtn: { padding: 4 },
   greeting: { fontSize: 20, fontWeight: '700', color: Colors.white },
   headerSub: { fontSize: 13, color: Colors.textMuted, marginTop: 2 },
   avatar: {
@@ -225,4 +219,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   availableText: { fontSize: 11, color: Colors.secondary, fontWeight: '600' },
+  emptyProviders: { alignItems: 'center', paddingVertical: 32, marginHorizontal: 20 },
+  emptyProvidersText: { fontSize: 15, color: Colors.textSecondary, fontWeight: '600' },
+  emptyProvidersSubText: { fontSize: 13, color: Colors.textMuted, marginTop: 6, textAlign: 'center' },
 });
