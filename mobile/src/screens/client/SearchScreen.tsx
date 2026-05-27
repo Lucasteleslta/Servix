@@ -104,19 +104,21 @@ export function SearchScreen({ navigation }: Props) {
             <Text style={styles.sectionTitle}>
               {loading ? 'Buscando...' : `${results.length} resultado(s)`}
             </Text>
-            {results.map((p) => (
+            {results.filter((p): p is Provider => Boolean(p?.name)).map((p) => (
               <TouchableOpacity
                 key={p.id}
                 style={styles.resultCard}
                 onPress={() => navigation.navigate('ProviderProfile', { providerId: p.id })}
               >
                 <View style={styles.resultAvatar}>
-                  <Text style={styles.resultAvatarText}>{p.name[0]}</Text>
+                  <Text style={styles.resultAvatarText}>{p?.name?.[0] ?? '?'}</Text>
                 </View>
                 <View style={styles.resultInfo}>
-                  <Text style={styles.resultName}>{p.name}</Text>
-                  <Text style={styles.resultSpecialty}>{p.specialty}</Text>
-                  <Text style={styles.resultRating}>⭐ {p.rating.toFixed(1)} · {p.city}</Text>
+                  <Text style={styles.resultName}>{p?.name ?? '—'}</Text>
+                  <Text style={styles.resultSpecialty}>{p?.specialty ?? ''}</Text>
+                  <Text style={styles.resultRating}>
+                    ⭐ {p?.rating != null ? p.rating.toFixed(1) : '—'} · {p?.city ?? ''}
+                  </Text>
                 </View>
               </TouchableOpacity>
             ))}

@@ -67,7 +67,7 @@ export function ProviderProfileScreen({ navigation, route }: Props) {
         </TouchableOpacity>
         <View style={styles.heroContent}>
           <View style={styles.heroAvatar}>
-            <Text style={styles.heroAvatarText}>{p.name[0]}</Text>
+            <Text style={styles.heroAvatarText}>{p?.name?.[0] ?? '?'}</Text>
           </View>
           <Text style={styles.heroName}>{p.name}</Text>
           <Text style={styles.heroSpecialty}>{p.specialty}</Text>

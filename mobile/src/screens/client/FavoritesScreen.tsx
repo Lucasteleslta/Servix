@@ -36,7 +36,7 @@ export function FavoritesScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('ProviderProfile', { providerId: item.id })}
           >
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{item.name[0]}</Text>
+              <Text style={styles.avatarText}>{item?.name?.[0] ?? '?'}</Text>
             </View>
             <View style={styles.cardInfo}>
               <Text style={styles.name}>{item.name}</Text>

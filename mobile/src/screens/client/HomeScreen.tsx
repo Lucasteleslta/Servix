@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -25,7 +24,14 @@ export function HomeScreen({ navigation }: Props) {
   const [providers, setProviders] = useState<Provider[]>([]);
 
   useEffect(() => {
-    providerService.getFeatured().then(setProviders).catch(() => {});
+    providerService
+      .getFeatured()
+      .then((data) => {
+        // Guard against null/undefined items the API might return
+        const valid = (data ?? []).filter((p): p is Provider => Boolean(p?.name));
+        setProviders(valid);
+      })
+      .catch(() => {});
   }, []);
 
   const firstName = user?.name?.split(' ')[0] ?? 'você';
@@ -38,7 +44,7 @@ export function HomeScreen({ navigation }: Props) {
           <Text style={styles.headerSub}>O que precisa hoje?</Text>
         </View>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{firstName[0]?.toUpperCase()}</Text>
+          <Text style={styles.avatarText}>{firstName?.[0]?.toUpperCase() ?? '?'}</Text>
         </View>
       </View>
 
@@ -84,19 +90,21 @@ export function HomeScreen({ navigation }: Props) {
       ) : (
         providers.map((p) => (
           <TouchableOpacity
-            key={p.id}
+            key={p?.id ?? Math.random().toString()}
             style={styles.providerCard}
-            onPress={() => navigation.navigate('ProviderProfile', { providerId: p.id })}
+            onPress={() => p?.id && navigation.navigate('ProviderProfile', { providerId: p.id })}
           >
             <View style={styles.providerAvatar}>
-              <Text style={styles.providerAvatarText}>{p.name[0]}</Text>
+              <Text style={styles.providerAvatarText}>{p?.name?.[0] ?? '?'}</Text>
             </View>
             <View style={styles.providerInfo}>
-              <Text style={styles.providerName}>{p.name}</Text>
-              <Text style={styles.providerSpecialty}>{p.specialty}</Text>
+              <Text style={styles.providerName}>{p?.name ?? '—'}</Text>
+              <Text style={styles.providerSpecialty}>{p?.specialty ?? ''}</Text>
               <View style={styles.providerMeta}>
-                <Text style={styles.providerRating}>⭐ {p.rating.toFixed(1)}</Text>
-                {p.available && (
+                <Text style={styles.providerRating}>
+                  ⭐ {p?.rating != null ? p.rating.toFixed(1) : '—'}
+                </Text>
+                {p?.available === true && (
                   <View style={styles.availableBadge}>
                     <Text style={styles.availableText}>Disponível</Text>
                   </View>

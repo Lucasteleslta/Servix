@@ -6,21 +6,32 @@ import { User } from '../types/models';
 interface AuthState {
   user: User | null;
   token: string | null;
-  // Derived at call sites with Boolean(token) — not persisted to avoid string coercion
+  _hasHydrated: boolean;
+  setHasHydrated: (value: boolean) => void;
   setAuth: (user: User, token: string) => void;
   logout: () => void;
   restoreSession: () => void;
 }
 
 const secureStorage = createJSONStorage(() => ({
-  getItem: async (key: string) => {
-    return await SecureStore.getItemAsync(key);
+  getItem: async (key: string): Promise<string | null> => {
+    try {
+      return await SecureStore.getItemAsync(key);
+    } catch {
+      return null;
+    }
   },
-  setItem: async (key: string, value: string) => {
-    await SecureStore.setItemAsync(key, value);
+  setItem: async (key: string, value: string): Promise<void> => {
+    try {
+      await SecureStore.setItemAsync(key, value);
+    } catch {
+      // SecureStore unavailable (e.g. simulator without keychain) — ignore
+    }
   },
-  removeItem: async (key: string) => {
-    await SecureStore.deleteItemAsync(key);
+  removeItem: async (key: string): Promise<void> => {
+    try {
+      await SecureStore.deleteItemAsync(key);
+    } catch {}
   },
 }));
 
@@ -29,22 +40,28 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       token: null,
+      _hasHydrated: false,
 
-      setAuth: (user, token) => {
-        set({ user, token });
-      },
+      setHasHydrated: (value) => set({ _hasHydrated: value }),
 
-      logout: () => {
-        set({ user: null, token: null });
-      },
+      setAuth: (user, token) => set({ user, token }),
+
+      logout: () => set({ user: null, token: null }),
 
       restoreSession: () => {
-        // No-op: token/user are restored automatically by zustand persist
+        // zustand persist restores user/token automatically from SecureStore.
+        // This is a no-op kept for API compatibility; _hasHydrated signals readiness.
       },
     }),
     {
       name: 'auth-storage',
       storage: secureStorage,
+      // Only persist user and token — not ephemeral flags
+      partialize: (state) => ({ user: state.user, token: state.token }),
+      onRehydrateStorage: () => (state) => {
+        // Called after hydration completes (or fails). Marks the store as ready.
+        state?.setHasHydrated(true);
+      },
     }
   )
 );
