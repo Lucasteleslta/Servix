@@ -18,6 +18,10 @@ import { ConfirmationScreen } from '../screens/client/ConfirmationScreen';
 import { TrackingScreen } from '../screens/client/TrackingScreen';
 import { ChatScreen } from '../screens/client/ChatScreen';
 import { NotificationsScreen } from '../screens/client/NotificationsScreen';
+import { SearchFilterScreen } from '../screens/client/SearchFilterScreen';
+import { ProviderReviewsScreen } from '../screens/client/ProviderReviewsScreen';
+import { ReviewServiceScreen } from '../screens/client/ReviewServiceScreen';
+import { SettingsScreen } from '../screens/client/SettingsScreen';
 
 export type ClientRootParamList = {
   Tabs: undefined;
@@ -30,6 +34,10 @@ export type ClientRootParamList = {
   Tracking: { requestId: string; providerName?: string; providerSpecialty?: string };
   Chat: { requestId: string; providerName: string };
   Notifications: undefined;
+  SearchFilter: { initialCategory?: string } | undefined;
+  ProviderReviews: { providerId: string; providerName: string };
+  ReviewService: { requestId: string; providerName: string; providerInitial?: string };
+  Settings: undefined;
 };
 
 const RootStack = createNativeStackNavigator<ClientRootParamList>();
@@ -107,6 +115,10 @@ export function ClientNavigator() {
       <RootStack.Screen name="Tracking" component={TrackingScreen} />
       <RootStack.Screen name="Chat" component={ChatScreen} />
       <RootStack.Screen name="Notifications" component={NotificationsScreen} />
+      <RootStack.Screen name="SearchFilter" component={SearchFilterScreen} />
+      <RootStack.Screen name="ProviderReviews" component={ProviderReviewsScreen} />
+      <RootStack.Screen name="ReviewService" component={ReviewServiceScreen} />
+      <RootStack.Screen name="Settings" component={SettingsScreen} />
     </RootStack.Navigator>
   );
 }

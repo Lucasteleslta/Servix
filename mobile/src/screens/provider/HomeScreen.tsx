@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -82,7 +83,27 @@ export function ProviderHomeScreen() {
               >
                 <Text style={styles.viewBtnText}>Ver</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.refuseBtn}>
+              <TouchableOpacity
+                style={styles.refuseBtn}
+                onPress={() => {
+                  Alert.alert(
+                    'Recusar solicitação',
+                    'Deseja recusar esta solicitação?',
+                    [
+                      { text: 'Cancelar', style: 'cancel' },
+                      {
+                        text: 'Recusar',
+                        style: 'destructive',
+                        onPress: () => {
+                          requestService.cancel(req.id)
+                            .then(() => requestService.getReceivedRequests().then(setRequests))
+                            .catch(() => {});
+                        },
+                      },
+                    ]
+                  );
+                }}
+              >
                 <Text style={styles.refuseBtnText}>Recusar</Text>
               </TouchableOpacity>
             </View>

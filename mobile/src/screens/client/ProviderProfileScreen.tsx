@@ -109,6 +109,12 @@ export function ProviderProfileScreen({ navigation, route }: Props) {
           <Text style={styles.reviewCount}>({p.reviewCount} avaliações)</Text>
           <Text style={styles.city}>· {p.city}</Text>
         </View>
+        <TouchableOpacity
+          style={styles.seeAllReviews}
+          onPress={() => navigation.navigate('ProviderReviews', { providerId: p.id, providerName: p.name })}
+        >
+          <Text style={styles.seeAllReviewsText}>Ver todas as avaliações →</Text>
+        </TouchableOpacity>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sobre</Text>
@@ -230,6 +236,12 @@ const styles = StyleSheet.create({
   ratingText: { fontSize: 14, fontWeight: '700', color: Colors.white },
   reviewCount: { fontSize: 13, color: Colors.textMuted },
   city: { fontSize: 13, color: Colors.textMuted },
+  seeAllReviews: {
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+    paddingTop: 4,
+  },
+  seeAllReviewsText: { color: Colors.primary, fontSize: 13, marginBottom: 8 },
   section: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 4 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.white, marginBottom: 12 },
   bioText: { fontSize: 14, color: Colors.textMuted, lineHeight: 22 },

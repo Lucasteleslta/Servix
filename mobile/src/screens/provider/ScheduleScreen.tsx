@@ -6,8 +6,11 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
+import { ProviderRootParamList } from '../../navigation/ProviderNavigator';
 
 const DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -22,9 +25,10 @@ function buildCalendar() {
   return { cells, today: today.getDate(), month, year };
 }
 
-const SCHEDULE: Record<number, { time: string; client: string; service: string; color: string }[]> = {};
+const SCHEDULE: Record<number, { time: string; client: string; service: string; color: string; requestId?: string }[]> = {};
 
 export function ProviderScheduleScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<ProviderRootParamList>>();
   const [view, setView] = useState<'week' | 'month'>('week');
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDate());
   const cal = buildCalendar();
@@ -107,6 +111,14 @@ export function ProviderScheduleScreen() {
               <Text style={styles.scheduleService}>{item.service}</Text>
               <Text style={styles.scheduleClient}>{item.client}</Text>
             </View>
+            {item.requestId && (
+              <TouchableOpacity
+                style={styles.viewServiceBtn}
+                onPress={() => navigation.navigate('ServiceStatus', { requestId: item.requestId!, clientName: item.client })}
+              >
+                <Text style={styles.viewServiceBtnText}>Ver</Text>
+              </TouchableOpacity>
+            )}
           </View>
         ))
       )}
@@ -178,4 +190,11 @@ const styles = StyleSheet.create({
   scheduleInfo: { flex: 1 },
   scheduleService: { fontSize: 14, fontWeight: '600', color: Colors.white },
   scheduleClient: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  viewServiceBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: Colors.secondary,
+    borderRadius: 8,
+  },
+  viewServiceBtnText: { color: Colors.white, fontSize: 12, fontWeight: '600' },
 });

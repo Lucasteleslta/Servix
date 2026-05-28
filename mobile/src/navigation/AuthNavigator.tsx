@@ -8,6 +8,12 @@ import { LoginScreen } from '../screens/auth/LoginScreen';
 import { RegisterScreen } from '../screens/auth/RegisterScreen';
 import { ForgotPasswordScreen } from '../screens/auth/ForgotPasswordScreen';
 import { ChooseRoleScreen } from '../screens/auth/ChooseRoleScreen';
+import { TermsScreen } from '../screens/auth/TermsScreen';
+import { PermissionsScreen } from '../screens/auth/PermissionsScreen';
+import { RegisterStep1Screen } from '../screens/provider/RegisterStep1Screen';
+import { RegisterStep2Screen } from '../screens/provider/RegisterStep2Screen';
+import { RegisterStep3Screen } from '../screens/provider/RegisterStep3Screen';
+import { RegisterStep4Screen } from '../screens/provider/RegisterStep4Screen';
 
 export type AuthStackParamList = {
   Splash: undefined;
@@ -18,6 +24,12 @@ export type AuthStackParamList = {
   Register: undefined;
   ForgotPassword: undefined;
   ChooseRole: undefined;
+  Terms: { isProvider: boolean };
+  Permissions: { isProvider: boolean };
+  ProviderRegister1: undefined;
+  ProviderRegister2: undefined;
+  ProviderRegister3: undefined;
+  ProviderRegister4: undefined;
 };
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -36,6 +48,12 @@ export function AuthNavigator() {
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen name="ChooseRole" component={ChooseRoleScreen} />
+      <Stack.Screen name="Terms" component={TermsScreen} />
+      <Stack.Screen name="Permissions" component={PermissionsScreen} />
+      <Stack.Screen name="ProviderRegister1" component={RegisterStep1Screen} />
+      <Stack.Screen name="ProviderRegister2" component={RegisterStep2Screen} />
+      <Stack.Screen name="ProviderRegister3" component={RegisterStep3Screen} />
+      <Stack.Screen name="ProviderRegister4" component={RegisterStep4Screen} />
     </Stack.Navigator>
   );
 }

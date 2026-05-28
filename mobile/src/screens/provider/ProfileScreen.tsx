@@ -33,7 +33,7 @@ export function ProviderProfileScreen() {
   ];
 
   const OPTIONS = [
-    { icon: 'star-outline', label: 'Avaliações recebidas', onPress: () => {} },
+    { icon: 'star-outline', label: 'Avaliações recebidas', onPress: () => navigation.navigate('ReceivedReviews') },
     { icon: 'construct-outline', label: 'Meus serviços', onPress: () => {} },
     { icon: 'camera-outline', label: 'Portfólio', onPress: () => {} },
     { icon: 'notifications-outline', label: 'Notificações', onPress: () => {} },

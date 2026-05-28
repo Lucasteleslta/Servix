@@ -89,12 +89,21 @@ export function BookingsScreen() {
               </View>
             </View>
             <View style={styles.cardActions}>
-              <TouchableOpacity
-                style={styles.actionBtn}
-                onPress={() => navigation.navigate('Tracking', { requestId: item.id, providerName: item.providerName ?? undefined })}
-              >
-                <Text style={styles.actionBtnText}>Acompanhar</Text>
-              </TouchableOpacity>
+              {item.status === 'COMPLETED' ? (
+                <TouchableOpacity
+                  style={styles.actionBtn}
+                  onPress={() => navigation.navigate('ReviewService', { requestId: item.id, providerName: item.providerName ?? 'Prestador' })}
+                >
+                  <Text style={styles.actionBtnText}>Avaliar</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={styles.actionBtn}
+                  onPress={() => navigation.navigate('Tracking', { requestId: item.id, providerName: item.providerName ?? undefined })}
+                >
+                  <Text style={styles.actionBtnText}>Acompanhar</Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 style={styles.actionBtnOutline}
                 onPress={() => navigation.navigate('Chat', { requestId: item.id, providerName: item.providerName ?? 'Prestador' })}

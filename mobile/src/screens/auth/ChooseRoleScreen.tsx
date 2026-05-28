@@ -6,30 +6,22 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
-import { authService } from '../../services/auth.service';
-import { useAuthStore } from '../../store/auth.store';
+import { AuthStackParamList } from '../../navigation/AuthNavigator';
 
 export function ChooseRoleScreen() {
   const [selected, setSelected] = useState<'CLIENT' | 'PROVIDER' | null>(null);
-  const [loading, setLoading] = useState(false);
-  const { setAuth, user, token } = useAuthStore();
+  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
 
-  const handleContinue = async () => {
+  const handleContinue = () => {
     if (!selected) {
       Alert.alert('Atenção', 'Selecione como deseja usar o Servix.');
       return;
     }
-    try {
-      setLoading(true);
-      const updatedUser = await authService.setRole(selected);
-      if (token) setAuth(updatedUser, token);
-    } catch {
-      Alert.alert('Erro', 'Não foi possível definir seu perfil. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
+    navigation.navigate('Terms', { isProvider: selected === 'PROVIDER' });
   };
 
   return (
@@ -68,11 +60,11 @@ export function ChooseRoleScreen() {
       <Text style={styles.note}>Você pode alterar isso depois nas configurações</Text>
 
       <TouchableOpacity
-        style={[styles.primaryBtn, (!selected || loading) && styles.btnDisabled]}
+        style={[styles.primaryBtn, !selected && styles.btnDisabled]}
         onPress={handleContinue}
-        disabled={!selected || loading}
+        disabled={!selected}
       >
-        <Text style={styles.primaryBtnText}>{loading ? 'Salvando...' : 'Continuar'}</Text>
+        <Text style={styles.primaryBtnText}>Continuar</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

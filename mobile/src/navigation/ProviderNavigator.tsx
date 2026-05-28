@@ -13,12 +13,16 @@ import { EarningsScreen } from '../screens/provider/EarningsScreen';
 import { ProviderScheduleScreen } from '../screens/provider/ScheduleScreen';
 import { ProviderProfileScreen } from '../screens/provider/ProfileScreen';
 import { ProviderChatScreen } from '../screens/provider/ChatScreen';
+import { ServiceStatusScreen } from '../screens/provider/ServiceStatusScreen';
+import { ReceivedReviewsScreen } from '../screens/provider/ReceivedReviewsScreen';
 
 export type ProviderRootParamList = {
   Tabs: undefined;
   RequestDetail: { requestId: string };
   Proposal: { requestId: string };
   ProviderChat: { requestId: string; clientName: string };
+  ServiceStatus: { requestId: string; clientName: string };
+  ReceivedReviews: undefined;
 };
 
 const RootStack = createNativeStackNavigator<ProviderRootParamList>();
@@ -90,6 +94,8 @@ export function ProviderNavigator() {
       <RootStack.Screen name="RequestDetail" component={RequestDetailScreen} />
       <RootStack.Screen name="Proposal" component={ProposalScreen} />
       <RootStack.Screen name="ProviderChat" component={ProviderChatScreen} />
+      <RootStack.Screen name="ServiceStatus" component={ServiceStatusScreen} />
+      <RootStack.Screen name="ReceivedReviews" component={ReceivedReviewsScreen} />
     </RootStack.Navigator>
   );
 }

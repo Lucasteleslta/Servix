@@ -35,7 +35,7 @@ export function ProfileScreen() {
   const OPTIONS = [
     { icon: 'time-outline', label: 'Histórico de serviços', onPress: () => navigation.navigate('Tabs') },
     { icon: 'notifications-outline', label: 'Notificações', onPress: () => navigation.navigate('Notifications') },
-    { icon: 'settings-outline', label: 'Configurações', onPress: () => {} },
+    { icon: 'settings-outline', label: 'Configurações', onPress: () => navigation.navigate('Settings') },
     { icon: 'help-circle-outline', label: 'Ajuda e suporte', onPress: () => {} },
     { icon: 'shield-outline', label: 'Privacidade', onPress: () => {} },
   ];

@@ -69,7 +69,10 @@ export function SearchScreen({ route }: Props) {
               </TouchableOpacity>
             )}
           </View>
-          <TouchableOpacity style={styles.filterBtn}>
+          <TouchableOpacity
+            style={styles.filterBtn}
+            onPress={() => navigation.navigate('SearchFilter', { initialCategory: query || undefined })}
+          >
             <Ionicons name="options" size={20} color={Colors.white} />
           </TouchableOpacity>
         </View>
